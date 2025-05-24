@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- CSS -->
+    <link rel="stylesheet" href="">
+    <title>Banquetes de Catherine - Bienvenidos</title>
+</head>
+<body>
+    <table>
+        <tr>
+            <th>No.usuario</th>
+        </tr>
+        {% for i in consulta %}
+        <tr>
+            <th>{{ i }}</th>
+        </tr>
+        {% endfor %}
+    </table>
+    {# Este es un comentario #}
+</body>
+</html>

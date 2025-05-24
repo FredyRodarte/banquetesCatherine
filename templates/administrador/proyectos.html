@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %} Proyectos - Administrador {% endblock %}
+
+{% block content %}
+    <div class="contenedor">
+        <div class="titulo">
+            <h2>Proyectos</h2>
+        </div>
+        <div class="contenido">
+            <button type="button" class="btn btn-primary agregar">Agregar proyecto <i class="fa-solid fa-circle-plus"></i> </button>
+        </div>
+        <div>
+            <table class="table table-primary table table-striped tabla_proyectos" id="proyectos">
+                <thead class="tabla-cabecera">
+                    <tr>
+                        <th>ID</th>
+                        <th>Comenzales</th>
+                        <th>Fecha de evento</th>
+                        <th>Anticipo</th>
+                        <th>Estatus del evento</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr class="table">
+                        <th>Texto aqui</th>
+                        <th>Texto aqui</th>
+                        <th>Texto aqui</th>
+                        <th>Texto aqui</th>
+                        <th>Texto aqui</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
