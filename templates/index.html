@@ -1,38 +1,122 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Banquetes de Catherine - Bienvenidos</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+img{% extends "base.html" %}
 
-</head>
-
-{%extends 'base.html' %}
-
-{% block title %} Banquetes de Catherine - Bienvenidos {% endblock %}
+{% block title %}Banquetes Catherin{% endblock %}
 
 {% block content %}
-    <div class="contenedor">
-        <div class="titulo">
-            <h2>Bienvenidos</h2>
+<!-- Hero Section (Portada) -->
+<section class="hero-section bg-dark text-white text-center py-5">
+    <div class="container py-5">
+        <h1 class="display-4 fw-bold">Banquetes Gourmet a tu Medida</h1>
+        <p class="lead">Servicios de catering y banquetes para eventos especiales</p>
+        <a href="#contacto" class="btn btn-primary btn-lg mt-3">¡Contáctame!</a>
+    </div>
+</section>
+
+<!-- Servicios Destacados -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Nuestros Servicios</h2>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <img src="{{ url_for('static', filename='img/plato-destacado1.jpg') }}" class="card-img-top" alt="Banquete para bodas">
+                    <div class="card-body">
+                        <h5 class="card-title">Bodas</h5>
+                        <p class="card-text">Menús personalizados para tu día especial.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <img src="{{ url_for('static', filename='img/plato-destacado2.jpg') }}" class="card-img-top" alt="Eventos corporativos">
+                    <div class="card-body">
+                        <h5 class="card-title">Eventos Corporativos</h5>
+                        <p class="card-text">Catering profesional para empresas.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <img src="{{ url_for('static', filename='img/plato-destacado3.jpg') }}" class="card-img-top" alt="Fiestas privadas">
+                    <div class="card-body">
+                        <h5 class="card-title">Fiestas Privadas</h5>
+                        <p class="card-text">Experiencia culinaria única en tu hogar.</p>
+                    </div>
+                </div>
+            </div>
         </div>
+    </div>
+</section>
 
-        <p>Hola mundo, esto es Flask!</p>
-    <table>
-        <tr>
-            <th>No. Usuario</th>
-        </tr>
-        {% for i in consulta %}
-        <tr>
-            <th>{{i}}</th>
-        </tr>
-        {% endfor %}
-    </table>
+<!-- Sobre la Chef -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-6">
+                <img src="{{ url_for('static', filename='img/chef-portada.jpg') }}" class="img-fluid rounded" alt="Chef">
+            </div>
+            <div class="col-md-6">
+                <h2 class="mb-4">Sobre Mí</h2>
+                <p>Con más de 10 años de experiencia en gastronomía, me especializo en crear banquetes memorables con ingredientes frescos y técnicas innovadoras.</p>
+                <a href="#" class="btn btn-outline-primary">Conoce más</a>
+            </div>
+        </div>
+    </div>
+</section>
 
-    </div>    
-    
+<!-- Testimonios -->
+<section class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Testimonios</h2>
+        <div class="row">
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-text">"¡Increíble banquete para nuestra boda! Todos quedaron impresionados."</p>
+                        <footer class="blockquote-footer">María G.</footer>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-text">"Profesionalismo y sabor excepcional en nuestro evento corporativo."</p>
+                        <footer class="blockquote-footer">Carlos R.</footer>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-4">
+                <div class="card">
+                    <div class="card-body">
+                        <p class="card-text">"La mejor experiencia gastronómica en mi fiesta de cumpleaños."</p>
+                        <footer class="blockquote-footer">Laura S.</footer>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
-    {#Esto es un comentario#}
-
+<!-- Contacto -->
+<section id="contacto" class="py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Contacto</h2>
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <form>
+                    <div class="mb-3">
+                        <input type="text" class="form-control" placeholder="Nombre" required>
+                    </div>
+                    <div class="mb-3">
+                        <input type="email" class="form-control" placeholder="Correo electrónico" required>
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control" rows="5" placeholder="Mensaje" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Enviar Mensaje</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
 {% endblock %}
-</html>
