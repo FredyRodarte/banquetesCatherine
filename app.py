@@ -3,7 +3,7 @@ from datetime import datetime
 import cx_Oracle
 import re
 
-dsn = cx_Oracle.makedsn("localhost", 1521, service_name="XE") 
+dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xe") 
 conn = cx_Oracle.connect(user="banquetes", password="banquetes", dsn=dsn)
 cursor = conn.cursor()
 
@@ -99,7 +99,7 @@ def registrar():
         conn.commit()
 
         flash("✅ El usuario fue registrado exitosamente.", "success")
-        return redirect(url_for('listar_usuarios'))
+        return redirect(url_for('nuevo_usuario'))
 
     except Exception as e:
         print("❌ ERROR al registrar usuario:", e)
@@ -217,16 +217,221 @@ def actualizar_usuario(id):
 
 @app.route('/admin/ingredientes')
 def lista_ingredientes():
-    ingredientes_ejemplo = [
-        {
-            'id_ingrediente': 1,
-            'nombre_ingrediente': 'Harina de trigo',
-            'unidad_medida': 'kg',
-            'presentacion': 'Bolsa de 1 kg',
-            'descripcion': 'Harina refinada para repostería'
-        },
-]
-    return render_template('administrador/ingredientes.html', ingredientes=ingredientes_ejemplo)
+    try:
+        cursor.execute("SELECT * FROM ingrediente ORDER BY id_ingrediente")
+        rows = cursor.fetchall()
+        ingredientes = []
+        for row in rows:
+            ingredientes.append({
+                'id': row[0],
+                'nombre': row[1],
+                'unidad': row[2],
+                'presentacion': row[3],
+                'descripcion': row[4],
+                'precio': row[5]
+            })
+        return render_template("administrador/ingredientes.html", ingredientes=ingredientes)
+    except Exception as e:
+        print(f"Error al consultar ingredientes: {e}")
+        return "Error cargando ingredientes"
+
+@app.route('/admin/ingrediente/nuevo', methods=['GET', 'POST'])
+def nuevo_ingrediente():
+    if request.method == 'POST':
+        try:
+            datos = (
+                request.form['nombre'],
+                request.form['unidad'],
+                request.form['presentacion'],
+                request.form['descripcion'],
+                float(request.form['precio'])
+            )
+            cursor.execute("""
+                INSERT INTO ingrediente (
+                    id_ingrediente, nombre_ingrediente, unidad_medida,
+                    presentacion, descripcion, precio
+                ) VALUES (
+                    ingrediente_seq.NEXTVAL, :1, :2, :3, :4, :5
+                )
+            """, datos)
+            conn.commit()
+            flash("Ingrediente registrado correctamente.", "success")
+            return redirect(url_for('listar_ingredientes'))
+        except Exception as e:
+            print(f"Error al registrar ingrediente: {e}")
+            flash("Error al registrar el ingrediente.", "danger")
+            return redirect(url_for('nuevo_ingrediente'))
+
+    return render_template("administrador/nuevo_ingrediente.html")
+
+@app.route('/admin/ingrediente/editar/<int:id>', methods=['GET'])
+def editar_ingrediente(id):
+    try:
+        cursor.execute("SELECT * FROM ingrediente WHERE id_ingrediente = :1", [id])
+        row = cursor.fetchone()
+        if row:
+            ingrediente = {
+                'id': row[0],
+                'nombre': row[1],
+                'unidad': row[2],
+                'presentacion': row[3],
+                'descripcion': row[4],
+                'precio': row[5]
+            }
+            return render_template("administrador/editar_ingrediente.html", ingrediente=ingrediente)
+        else:
+            flash("Ingrediente no encontrado.", "danger")
+            return redirect(url_for('lista_ingredientes'))
+    except Exception as e:
+        print(f"Error al cargar ingrediente: {e}")
+        flash("Error al cargar el ingrediente.", "danger")
+        return redirect(url_for('lista_ingredientes'))
+
+@app.route('/admin/ingrediente/actualizar/<int:id>', methods=['POST'])
+def actualizar_ingrediente(id):
+    try:
+        datos = (
+            request.form['nombre'],
+            request.form['unidad'],
+            request.form['presentacion'],
+            request.form['descripcion'],
+            float(request.form['precio']),
+            id
+        )
+        cursor.execute("""
+            UPDATE ingrediente SET
+                nombre_ingrediente = :1,
+                unidad_medida = :2,
+                presentacion = :3,
+                descripcion = :4,
+                precio = :5
+            WHERE id_ingrediente = :6
+        """, datos)
+        conn.commit()
+        flash("Ingrediente actualizado correctamente.", "success")
+        return redirect(url_for('lista_ingredientes'))
+    except Exception as e:
+        print(f"Error al actualizar ingrediente: {e}")
+        flash("Error al actualizar el ingrediente.", "danger")
+        return redirect(url_for('editar_ingrediente', id=id))
+
+@app.route('/admin/ingrediente/eliminar/<int:id>', methods=['POST'])
+def eliminar_ingrediente(id):
+    try:
+        cursor.execute("DELETE FROM ingrediente WHERE id_ingrediente = :1", [id])
+        conn.commit()
+        flash("Ingrediente eliminado correctamente.", "success")
+    except Exception as e:
+        print(f"Error al eliminar ingrediente: {e}")
+        flash("No se pudo eliminar el ingrediente.", "danger")
+    return redirect(url_for('lista_ingredientes'))
+
+
+#=======================================================
+# Ruta base para el Gerente de Proyecto
+#========================================================
+@app.route('/admin/gerente_proyecto')
+def dashboard_gerente():
+    # Datos simulados 
+    proyectos = [
+        {"nombre": "Boda González", "fecha": "2025-07-12", "estatus": "En preparación"},
+        {"nombre": "Conferencia Tech", "fecha": "2025-08-01", "estatus": "Confirmado"},
+        {"nombre": "Graduación UNAM", "fecha": "2025-06-28", "estatus": "Finalizado"}
+    ]
+    return render_template('administrador/gerente_proyecto.html', proyectos=proyectos)
+
+#=======================================================
+# Ruta base para Salones
+#========================================================
+
+@app.route('/admin/salones')
+def listar_salones():
+    try:
+        cursor.execute("""
+            SELECT 
+                ID_SALON, 
+                NOMBRE_SALON, 
+                CAPACIDAD,
+                CALLE || ' ' || NUMERO || ', ' || LOCALIDAD || ', ' || MUNICIPIO || ', ' || ESTADO || ', CP ' || C_POSTAL AS UBICACION
+            FROM SALON
+        """)
+        resultados = cursor.fetchall()
+
+        salones = []
+        for row in resultados:
+            salones.append({
+                'id': row[0],
+                'nombre': row[1],
+                'capacidad': row[2],
+                'ubicacion': row[3]
+            })
+            
+        print(salones)
+
+        return render_template("administrador/salones.html", salones=salones)
+    
+    except Exception as e:
+        print(f"❌ ERROR en listar_salones: {e}")
+        return "Error al consultar los salones", 500
+
+cursor.execute("SELECT USER FROM DUAL")
+print("Usuario conectado:", cursor.fetchone()[0])
+
+#=======================================================
+# Ruta base agregar Salones
+#========================================================
+
+@app.route('/admin/salones/nuevo', methods=['GET', 'POST'])
+def nuevo_salon():
+    if request.method == 'POST':
+        try:
+            id_gerente = request.form['id_gerente']
+            nombre = request.form['nombre']
+            capacidad = request.form['capacidad']
+            calle = request.form['calle']
+            numero = request.form['numero']
+            localidad = request.form['localidad']
+            municipio = request.form['municipio']
+            estado = request.form['estado']
+            c_postal = request.form['c_postal']
+
+            cursor.execute("""
+                INSERT INTO SALON (
+                    ID_SALON, ID_GERENTE, NOMBRE_SALON, CAPACIDAD, CALLE, NUMERO, LOCALIDAD, MUNICIPIO, ESTADO, C_POSTAL
+                ) VALUES (
+                    SEQ_SALON_ID.NEXTVAL, :id_gerente, :nombre, :capacidad, :calle, :numero, :localidad, :municipio, :estado, :c_postal
+                )
+            """, {
+                'id_gerente': id_gerente,
+                'nombre': nombre,
+                'capacidad': capacidad,
+                'calle': calle,
+                'numero': numero,
+                'localidad': localidad,
+                'municipio': municipio,
+                'estado': estado,
+                'c_postal': c_postal
+            })
+
+            conn.commit()
+
+            return redirect(url_for('listar_salones'))
+
+        except Exception as e:
+            print(f"❌ ERROR al agregar salón: {e}")
+            return "Error al agregar el salón", 500
+
+    # Vista del formulario
+    try:
+        cursor.execute("SELECT ID_GERENTE, NOMBRE FROM GERENTE_PROYECTO")
+        resultados = cursor.fetchall()
+        gerentes = [{'id': row[0], 'nombre': row[1]} for row in resultados]
+
+        return render_template('administrador/nuevo_salon.html', gerentes=gerentes)
+
+    except Exception as e:
+        print(f"❌ ERROR al cargar gerentes: {e}")
+        return "Error al cargar formulario", 500
 
 
 if __name__ == '__main__':
