@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %} Nuevo Usuario {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h2 class="mb-3 mb-md-0">Registrar Nuevo Usuario</h2>
+        <a href="{{ url_for('listar_usuario') }}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i> Volver al listado
+        </a>
+    </div>
+
+    <form method="POST" action="{{ url_for('registrar') }}" class="row g-3 needs-validation" novalidate>
+
+        <!-- RFC -->
+        <div class="col-md-4">
+            <label for="rfc" class="form-label">RFC</label>
+            <input type="text" class="form-control" name="rfc" id="rfc"
+                placeholder="XXXX-XXXXXX-XXX"
+                pattern="^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$" maxlength="13"
+                title="Introduce un RFC válido con 13 caracteres (letras y números))"
+                required autocomplete="off">
+            <div class="rfc_invalido">
+                    Por favor ingrese un RFC válido
+            </div>
+        </div>
+
+        <!-- CURP -->
+        <div class="col-md-4">
+            <label for="curp" class="form-label">CURP</label>
+            <input type="text" class="form-control" name="curp" id="curp" required placeholder="XXXX-XXXXXX-X-XX-XXX-X-X"
+            maxlength="18" pattern="^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$" 
+           title="Introduce un CURP válido con 18 caracteres ()letras y números" autocomplete="off" inputmode="text">
+        </div>
+
+        <!-- Contraseña -->
+        <div class="col-md-4">
+            <label for="pass" class="form-label">Contraseña</label>
+            <input type="password" class="form-control" name="pass" id="pass" required autocomplete="new-password">
+        </div>
+
+        <!-- Nombre completo -->
+        <div class="col-md-4">
+            <label for="nombre" class="form-label">Nombre(s)</label>
+            <input type="text" class="form-control" name="nombre" id="nombre" required>
+        </div>
+        <div class="col-md-4">
+            <label for="apaterno" class="form-label">Apellido Paterno</label>
+            <input type="text" class="form-control" name="apaterno" id="apaterno" required>
+        </div>
+        <div class="col-md-4">
+            <label for="amaterno" class="form-label">Apellido Materno</label>
+            <input type="text" class="form-control" name="amaterno" id="amaterno" required>
+        </div>
+
+        <!-- Dirección -->
+        <div class="col-md-6">
+            <label for="calle" class="form-label">Calle</label>
+            <input type="text" class="form-control" name="calle" id="calle" required>
+        </div>
+        <div class="col-md-2">
+            <label for="numero" class="form-label">Número</label>
+            <input type="text" class="form-control" name="numero" id="numero" required>
+        </div>
+        <div class="col-md-4">
+            <label for="localidad" class="form-label">Localidad</label>
+            <input type="text" class="form-control" name="localidad" id="localidad" required>
+        </div>
+        <div class="col-md-4">
+            <label for="municipio" class="form-label">Municipio</label>
+            <input type="text" class="form-control" name="municipio" id="municipio" required>
+        </div>
+        <div class="col-md-4">
+            <label for="estado" class="form-label">Estado</label>
+            <input type="text" class="form-control" name="estado" id="estado" required>
+        </div>
+        <div class="col-md-4">
+            <label for="c_postal" class="form-label">Código Postal</label>
+            <input type="text" class="form-control" name="c_postal" id="c_postal" required>
+        </div>
+
+        <!-- Botones -->
+        <div class="col-12 mt-4">
+            <button class="btn btn-success" type="submit">
+                <i class="fa-solid fa-user-plus me-1"></i> Registrar Usuario
+            </button>
+            <a href="{{ url_for('listar_usuario') }}" class="btn btn-secondary ms-2">
+                <i class="fa-solid fa-times me-1"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
