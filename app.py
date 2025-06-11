@@ -3,8 +3,8 @@ from datetime import datetime
 import cx_Oracle
 import re
 
-dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xe") 
-conn = cx_Oracle.connect(user="banquetes", password="banquetes", dsn=dsn)
+dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xepdb1") 
+conn = cx_Oracle.connect(user="system", password="1346", dsn=dsn)
 cursor = conn.cursor()
 
 app = Flask(__name__)

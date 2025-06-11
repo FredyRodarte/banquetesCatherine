@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Salones{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Salones Registrados</h2>
+    <a href="{{ url_for('nuevo_salon') }}" class="btn btn-success mb-3">➕ Nuevo Salón</a>
+    <table class="table table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>Capacidad</th>
+                <th>Ubicación</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for salon in salones %}
+            <tr>
+                <td>{{ salon.id }}</td>
+                <td>{{ salon.nombre }}</td>
+                <td>{{ salon.capacidad }}</td>
+                <td>{{ salon.ubicacion }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuevo Salón{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="mb-0">Registrar Nuevo Salón</h2>
+        <a href="/admin/salones"" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i> Volver a Salones
+        </a>
+    </div>
+
+    <form method="POST" action="{{ url_for('nuevo_salon') }}" class="row g-3 needs-validation" novalidate>
+        <div class="col-md-6">
+            <label for="nombre" class="form-label">Nombre del Salón</label>
+            <input type="text" class="form-control" name="nombre" id="nombre" required>
+        </div>
+
+        <div class="col-md-3">
+            <label for="capacidad" class="form-label">Capacidad</label>
+            <input type="number" class="form-control" name="capacidad" id="capacidad" required min="1">
+        </div>
+
+        <div class="col-md-6">
+            <label for="id_gerente" class="form-label">Gerente de Proyecto</label>
+            <select class="form-select" name="id_gerente" id="id_gerente" required>
+                <option value="">Seleccione un gerente...</option>
+                {% for gerente in gerentes %}
+                    <option value="{{ gerente.id }}">{{ gerente.nombre }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="col-md-6">
+            <label for="calle" class="form-label">Calle</label>
+            <input type="text" class="form-control" name="calle" id="calle" required>
+        </div>
+
+        <div class="col-md-2">
+            <label for="numero" class="form-label">Número</label>
+            <input type="text" class="form-control" name="numero" id="numero" required>
+        </div>
+
+        <div class="col-md-4">
+            <label for="localidad" class="form-label">Localidad</label>
+            <input type="text" class="form-control" name="localidad" id="localidad" required>
+        </div>
+
+        <div class="col-md-4">
+            <label for="municipio" class="form-label">Municipio</label>
+            <input type="text" class="form-control" name="municipio" id="municipio" required>
+        </div>
+
+        <div class="col-md-4">
+            <label for="estado" class="form-label">Estado</label>
+            <input type="text" class="form-control" name="estado" id="estado" required>
+        </div>
+
+        <div class="col-md-4">
+            <label for="c_postal" class="form-label">Código Postal</label>
+            <input type="text" class="form-control" name="c_postal" id="c_postal" required>
+        </div>
+
+
+        <div class="col-12 mt-4">
+            <button class="btn btn-success" type="submit">
+                <i class="fa-solid fa-plus me-1"></i> Registrar Salón
+            </button>
+            <a href="/admin/salones" class="btn btn-secondary ms-2">
+                <i class="fa-solid fa-times me-1"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
