@@ -12,11 +12,17 @@ app.secret_key = 'contraseña'
 
 @app.route('/')
 def index():
-    consulta = [1,2,3,4,5,6]
-    return render_template('index.html', consulta = consulta)
+    
+    return render_template('index.html')
 
 @app.route('/admin/proyectos')
 def admin_proyectos():
+    try:
+        cursor.execute("SELECT * FROM proyecto")
+        rows = cursor.fetchall()
+        proyectos = []
+    except Exception as e:
+        print("Error al cargar proyectos")
     return render_template('/administrador/proyectos.html')
 
 @app.route('/admin/usuario/nuevo')
@@ -230,6 +236,7 @@ def lista_ingredientes():
                 'descripcion': row[4],
                 'precio': row[5]
             })
+        #print(ingredientes)
         return render_template("administrador/ingredientes.html", ingredientes=ingredientes)
     except Exception as e:
         print(f"Error al consultar ingredientes: {e}")

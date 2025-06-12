@@ -1,0 +1,16 @@
+# Ignorar archivos de bases de datos
+*.sql
+*.db
+
+# Ignorar archivos de entorno y configuración sensible
+.env
+.env.local
+
+
+# Ignorar archivos generados por el sistema
+.DS_Store
+Thumbs.db
+
+# Archivos Python
+__pycache__/
+*.pyc
