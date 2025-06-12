@@ -18,12 +18,66 @@ def index():
 @app.route('/admin/proyectos')
 def admin_proyectos():
     try:
-        cursor.execute("SELECT * FROM proyecto")
+        query = """
+        SELECT 
+            p.ID_PROYECTO,
+            p.COMENSALES,
+            s.NOMBRE_SALON AS NOMBRE_SALON,
+            g.NOMBRE || ' ' || g.APATERNO || ' ' || g.AMATERNO AS NOMBRE_GERENTE,
+            p.RFC_GERENTE,
+            p.CURP_GERENTE,
+            u.NOMBRE || ' ' || u.APATERNO || ' ' || u.AMATERNO AS NOMBRE_USUARIO,
+            p.RFC_USUARIO,
+            p.CURP_USUARIO,
+            paq.NOMBRE_PAQUETE AS NOMBRE_PAQUETE,
+            TO_CHAR(p.FECHA_EVENTO, 'DD/MM/YYYY') AS FECHA_EVENTO_FORM,
+            p.ANTICIPO,
+            CASE p.ESTATUS_EVENTO 
+                WHEN 1 THEN 'Pendiente'
+                WHEN 2 THEN 'Confirmado'
+                WHEN 3 THEN 'Cancelado'
+                WHEN 4 THEN 'Completado'
+                ELSE 'Desconocido'
+            END AS ESTATUS_EVENTO
+        FROM 
+            proyecto p
+        JOIN 
+            salon s ON p.ID_SALON = s.ID_SALON
+        JOIN 
+            gerente_evento g ON p.ID_GERENTE = g.ID_GERENTE
+        JOIN 
+            usuario u ON p.ID_USUARIO = u.ID_USUARIO
+        JOIN 
+            paquete paq ON p.ID_PAQUETE = paq.ID_PAQUETE
+        ORDER BY
+            p.ID_PROYECTO
+        """
+
+        cursor.execute(query)
         rows = cursor.fetchall()
         proyectos = []
+
+        for row in rows:
+            proyectos.append({
+                'id_proyecto': row[0],
+                'comensales': row[1],
+                'nombre_salon': row[2],
+                'nombre_gerente': row[3],
+                'rfc_gerente': row[4],
+                'curp_gerente': row[5],
+                'nombre_usuario': row[6],
+                'rfc_usuario': row[7],
+                'curp_usuario': row[8],
+                'nombre_paquete': row[9],
+                'fecha_evento': row[10],
+                'anticipo': row[11],
+                'estatus_evento': row[12]
+            })
+        
+        return render_template('/administrador/proyectos.html', proyectos=proyectos)
     except Exception as e:
         print("Error al cargar proyectos")
-    return render_template('/administrador/proyectos.html')
+        return render_template('index.html')
 
 @app.route('/admin/usuario/nuevo')
 def nuevo_usuario():
@@ -373,7 +427,7 @@ def listar_salones():
                 'ubicacion': row[3]
             })
             
-        print(salones)
+        #print(salones)
 
         return render_template("administrador/salones.html", salones=salones)
     

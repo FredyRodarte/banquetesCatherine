@@ -10,23 +10,57 @@
         <div class="contenido">
             <button type="button" class="btn btn-success agregar">Registrar proyecto <i class="fa-solid fa-plus me-1"></i></button>
         </div>
-        <div>
-            <table class="tabla-proyectos table" id="proyectos">
-                <thead class="table-cabecera">
+        <!--Mensajes-->
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% if mensajes %}
+                {% for categoria, mensaje in mensajes %}
+                    <div class="alert alert-{{ categoria }} alert-dismissible fade show" role="alert">
+                        {{ mensaje }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <!--Fin mensajes-->
+
+        <!-- Tabla -->
+        <div class="table-responsive">
+            <table class="table table-striped table-hover align-middle tabla-proyectos" id="proyectos">
+                <thead class="table-cabecera table-dark">
                     <tr>
                         <th>ID</th>
                         <th>Comensales</th>
-                        <th>Fecha de evento</th>
+                        <th>Salón</th>
+                        <th>Gerente</th>
+                        <th>RFC Gerente</th>
+                        <th>CURP Gerente</th>
+                        <th>Cliente</th>
+                        <th>RFC Cliente</th>
+                        <th>CURP Cliente</th>
+                        <th>Paquete</th>
+                        <th>Fecha evento</th>
                         <th>Anticipo</th>
-                        <th>Estatus del evento</th>
+                        <th>Estatus evento</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <th>texto aquí</th>
-                    <th>texto aquí</th>
-                    <th>texto aquí</th>
-                    <th>texto aquí</th>
-                    <th>texto aquí</th>
+                    {% for proyecto in proyectos %}
+                    <tr>
+                        <td>{{ proyecto.id_proyecto }}</td>
+                        <td>{{ proyecto.comensales }}</td>
+                        <td>{{ proyecto.nombre_salon }}</td>
+                        <td>{{ proyecto.nombre_gerente }}</td>
+                        <td>{{ proyecto.rfc_gerente }}</td>
+                        <td>{{ proyecto.curp_gerente }}</td>
+                        <td>{{ proyecto.nombre_usuario }}</td>
+                        <td>{{ proyecto.rfc_usuario }}</td>
+                        <td>{{ proyecto.curp_usuario }}</td>
+                        <td>{{ proyecto.nombre_paquete }}</td>
+                        <td>{{ proyecto.fecha_evento }}</td>
+                        <td>${{ proyecto.anticipo }}</td>
+                        <td>{{ proyecto.estatus_evento }}</td>
+                    </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
