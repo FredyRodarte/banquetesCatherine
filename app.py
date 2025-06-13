@@ -7,6 +7,11 @@ dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xe")
 conn = cx_Oracle.connect(user="banquetes", password="banquetes", dsn=dsn)
 cursor = conn.cursor()
 
+#funcion para abrir y cerrar conexion
+def get_db_connection():
+    dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xe")
+    return cx_Oracle.connect(user="banquetes", password="banquetes", dsn=dsn)
+
 app = Flask(__name__)
 app.secret_key = 'contraseña'
 
@@ -18,6 +23,10 @@ def index():
 @app.route('/admin/proyectos')
 def admin_proyectos():
     try:
+        #crear conexion a la bd
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
         query = """
         SELECT 
             p.ID_PROYECTO,
@@ -53,8 +62,8 @@ def admin_proyectos():
             p.ID_PROYECTO
         """
 
-        cursor.execute(query)
-        rows = cursor.fetchall()
+        cursor1.execute(query)
+        rows = cursor1.fetchall()
         proyectos = []
 
         for row in rows:
@@ -74,10 +83,52 @@ def admin_proyectos():
                 'estatus_evento': row[12]
             })
         
+        #cerrar conexion 
+        cursor1.close()
+        conexion.close()
         return render_template('/administrador/proyectos.html', proyectos=proyectos)
     except Exception as e:
         print("Error al cargar proyectos")
         return render_template('index.html')
+
+@app.route('/admin/complementos')
+def admin_complementos():
+    try:
+        #crear conexion a la bd
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
+        query = """
+        SELECT
+            ID_COMPLEMENTO,
+            NOMBRE_COMPLEMENTO,
+            UNIDAD_MEDIDA,
+            PRESENTACION,
+            CANTIDAD
+        FROM BANQUETES.COMPLEMENTO
+        ORDER BY ID_COMPLEMENTO
+        """
+        #print("consulta a ejecutar:", query)
+        cursor1.execute(query)
+        rows = cursor1.fetchall()
+        complementos = []
+
+        for row in rows:
+            complementos.append({
+                'id_complemento': row[0],
+                'nombre': row[1],
+                'medida': row[2],
+                'presentacion': row[3],
+                'cantidad': row[4]
+            })
+
+        #cerrar conexion 
+        cursor1.close()
+        conexion.close()
+        #print("complementos:", complementos)
+        return render_template('/administrador/complementos.html', complementos=complementos)
+    except Exception as e:
+        print("Error al cargar la tabla complementos", e)
 
 @app.route('/admin/usuario/nuevo')
 def nuevo_usuario():
