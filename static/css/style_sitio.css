@@ -7,6 +7,23 @@
     text-align: center;
 }
 
+/*Estilo para carousel */
+.carousel-item img {
+    height: 600px; /* o el tamaño deseado */
+    object-fit: cover;
+    width: 100%;
+    border-radius: 15px;
+}
+
+/*Resaltar texto en carousel*/
+.carousel-caption {
+    background-color: rgba(0, 0, 0, 0.6); /* fondo negro translúcido */
+    padding: 1rem;
+    border-radius: 10px;
+    color: #fff; /* texto blanco */
+    text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.8);
+}
+
 .hero-section::before {
     content: '';
     position: absolute;

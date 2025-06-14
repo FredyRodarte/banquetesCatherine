@@ -134,6 +134,10 @@ def admin_complementos():
     except Exception as e:
         print("Error al cargar la tabla complementos", e)
 
+
+#=======================================================
+# Ruta base agregar Usuarios(que son los clientes)
+#========================================================
 @app.route('/admin/usuario/nuevo')
 def nuevo_usuario():
     return render_template('administrador/nuevo_usuario.html')
@@ -221,7 +225,9 @@ def registrar():
         flash("⚠️ El usuario no se pudo crear. Verifica los datos o que no esté duplicado el ID.", "danger")
         return redirect(url_for('nuevo_usuario'))
     
-
+#=======================================================
+# Ruta que muestra los usuarios(que son los clientes)
+#========================================================
 @app.route('/admin/usuario')
 def listar_usuario():
     try:
@@ -329,7 +335,9 @@ def actualizar_usuario(id):
         return f"Error al actualizar: {e}", 500
 
 
-
+#=======================================================
+# Ruta base agregar Ingredientes de platillos
+#========================================================
 @app.route('/admin/ingredientes')
 def lista_ingredientes():
     try:
@@ -548,6 +556,47 @@ def nuevo_salon():
     except Exception as e:
         print(f"❌ ERROR al cargar gerentes: {e}")
         return "Error al cargar formulario", 500
+
+#=======================================================
+# Ruta para mostrar Salones
+#========================================================
+@app.route('/salones_public')
+def salones_public():
+    try:
+        cursor.execute("""
+            SELECT ID_SALON, NOMBRE_SALON, CAPACIDAD,
+            CALLE || ' ' || NUMERO || ', ' || LOCALIDAD || ', ' || MUNICIPIO || ', ' || ESTADO || ', CP ' || C_POSTAL AS UBICACION
+            FROM SALON
+        """)
+        resultados = cursor.fetchall()
+
+        salones = []
+        for row in resultados:
+            nombre = row[1]
+            nombre_lower = nombre.lower()
+            
+            if 'diamante' in nombre_lower:
+                imagen = 'Diamante.jpeg'
+            elif 'esmeralda' in nombre_lower:
+                imagen = 'Esmeralda.jpeg'
+            elif 'azteca' in nombre_lower:
+                imagen = 'Azteca.jpeg'
+            else:
+                imagen = 'Default.jpg'
+
+            salones.append({
+                'id': row[0],
+                'nombre': nombre,
+                'capacidad': row[2],
+                'ubicacion': row[3],
+                'imagen': imagen
+            })
+
+        return render_template('publicos/salones_cliente.html', salones=salones)
+
+    except Exception as e:
+        print(f"❌ Error al cargar salones públicos: {e}")
+        return "Error cargando salones", 500
 
 
 if __name__ == '__main__':

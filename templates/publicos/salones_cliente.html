@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuestros Salones{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-5">Nuestros Salones</h2>
+    <div class="row g-4">
+        {% for salon in salones %}
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm">
+                <img src="{{ url_for('static', filename='img/Salones/' + salon.imagen) }}" class="card-img-top" alt="{{ salon.nombre }}" style="height: 200px; object-fit: cover;">
+                <div class="card-body">
+                    <h5 class="card-title">{{ salon.nombre }}</h5>
+                    <p class="card-text"><strong>Capacidad:</strong> {{ salon.capacidad }}</p>
+                    <p class="card-text"><strong>Ubicación:</strong> {{ salon.ubicacion }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
