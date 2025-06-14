@@ -23,8 +23,8 @@
         </div>
 
         <div class="col-md-6">
-            <label for="id_gerente" class="form-label">Gerente de Proyecto</label>
-            <select class="form-select" name="id_gerente" id="id_gerente" required>
+            <label for="id_gerente_s" class="form-label">Gerente de Salón</label>
+            <select class="form-select" name="id_gerente_s" id="id_gerente_s" required>
                 <option value="">Seleccione un gerente...</option>
                 {% for gerente in gerentes %}
                     <option value="{{ gerente.id }}">{{ gerente.nombre }}</option>
