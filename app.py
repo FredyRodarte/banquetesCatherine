@@ -91,6 +91,10 @@ def admin_proyectos():
         print("Error al cargar proyectos")
         return render_template('index.html')
 
+@app.route('/admin/nuevo_proyecto')
+def nuevo_proyecto():
+    return render_template('/administrador/nuevo_proyecto.html')
+
 @app.route('/admin/complementos')
 def admin_complementos():
     try:

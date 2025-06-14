@@ -8,7 +8,7 @@
             <h2 class="mb-3 mb-md-0">Proyectos</h2>
         </div>
         <div class="contenido">
-            <button type="button" class="btn btn-success agregar">Registrar proyecto <i class="fa-solid fa-plus me-1"></i></button>
+            <button type="button" class="btn btn-success agregar" onclick="window.location.href='/admin/nuevo_proyecto'">Registrar proyecto <i class="fa-solid fa-plus me-1"></i></button>
         </div>
         <!--Mensajes-->
         {% with mensajes = get_flashed_messages(with_categories=true) %}
