@@ -501,7 +501,7 @@ print("Usuario conectado:", cursor.fetchone()[0])
 def nuevo_salon():
     if request.method == 'POST':
         try:
-            id_gerente = request.form['id_gerente']
+            id_gerente_s = request.form['id_gerente_s']
             nombre = request.form['nombre']
             capacidad = request.form['capacidad']
             calle = request.form['calle']
@@ -513,12 +513,12 @@ def nuevo_salon():
 
             cursor.execute("""
                 INSERT INTO SALON (
-                    ID_SALON, ID_GERENTE, NOMBRE_SALON, CAPACIDAD, CALLE, NUMERO, LOCALIDAD, MUNICIPIO, ESTADO, C_POSTAL
+                    ID_SALON, ID_GERENTE_S, NOMBRE_SALON, CAPACIDAD, CALLE, NUMERO, LOCALIDAD, MUNICIPIO, ESTADO, C_POSTAL
                 ) VALUES (
-                    SEQ_SALON_ID.NEXTVAL, :id_gerente, :nombre, :capacidad, :calle, :numero, :localidad, :municipio, :estado, :c_postal
+                    SQ_ID_SALON.NEXTVAL, :id_gerente_S, :nombre, :capacidad, :calle, :numero, :localidad, :municipio, :estado, :c_postal
                 )
             """, {
-                'id_gerente': id_gerente,
+                'id_gerente_s': id_gerente_s,
                 'nombre': nombre,
                 'capacidad': capacidad,
                 'calle': calle,
@@ -539,7 +539,7 @@ def nuevo_salon():
 
     # Vista del formulario
     try:
-        cursor.execute("SELECT ID_GERENTE, NOMBRE FROM GERENTE_PROYECTO")
+        cursor.execute("SELECT ID_GERENTE_S, NOMBRE FROM GERENTE_SALON")
         resultados = cursor.fetchall()
         gerentes = [{'id': row[0], 'nombre': row[1]} for row in resultados]
 
