@@ -548,6 +548,134 @@ def nuevo_salon():
     except Exception as e:
         print(f"❌ ERROR al cargar gerentes: {e}")
         return "Error al cargar formulario", 500
+    
+
+
+#=======================================================
+# Función para generar ID único para nuevo gerente
+#=======================================================
+def generar_id_gerente():
+    conexion = get_db_connection()
+    cursor = conexion.cursor()
+    cursor.execute("SELECT MAX(ID_GERENTE) FROM GERENTE_SALON")
+    resultado = cursor.fetchone()
+    cursor.close()
+    conexion.close()
+
+    if resultado and resultado[0]:
+        ultimo_id = int(resultado[0][2:])  # de 'GS005' obtiene 5
+        nuevo_num = ultimo_id + 1
+    else:
+        nuevo_num = 1
+    return f"GS{nuevo_num:03}"  # da formato 'GS006'
+
+#=======================================================
+# Ruta para listar gerentes de salón
+#=======================================================
+@app.route('/admin/gerente_salon')
+def gerente_salon():
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT ID_GERENTE, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL
+            FROM GERENTE_SALON ORDER BY ID_GERENTE
+        """)
+        rows = cursor.fetchall()
+        gerentes = []
+        for r in rows:
+            gerentes.append({
+                'id_gerente': r[0],
+                'apaterno': r[1],
+                'amaterno': r[2],
+                'nombre': r[3],
+                'telefono': r[4],
+                'email': r[5]
+            })
+        cursor.close()
+        conexion.close()
+        return render_template('administrador/gerente_salon.html', gerentes=gerentes)
+    except Exception as e:
+        print('Error cargar gerentes:', e)
+        flash('Error al cargar gerentes', 'danger')
+        return render_template('administrador/gerente_salon.html', gerentes=[])
+
+#========================================================
+# Ruta para registrar nuevo gerente
+#========================================================
+@app.route('/admin/nuevo_gerente_salon', methods=['GET', 'POST'])
+def nuevo_gerente_salon():
+    if request.method == 'POST':
+        apaterno = request.form.get('apaterno')
+        amaterno = request.form.get('amaterno')
+        nombre = request.form.get('nombre')
+        telefono = request.form.get('telefono')
+        email = request.form.get('email')
+
+        try:
+            
+            id_gerente = generar_id_gerente()  # Generar nuevo ID único
+
+            conexion = get_db_connection()
+            cursor = conexion.cursor()
+            print (id_gerente, apaterno, amaterno, nombre, telefono, email)
+            cursor.execute("""
+                INSERT INTO GERENTE_SALON (ID_GERENTE, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL)
+                VALUES (:1, :2, :3, :4, :5, :6)
+            """, (id_gerente, apaterno, amaterno, nombre, telefono, email))
+            
+            conexion.commit()
+        
+            cursor.close()
+            conexion.close()
+            
+            flash('Gerente agregado correctamente', 'success')
+            
+            return redirect(url_for('gerente_salon'))
+        except Exception as e:
+            print('Error agregar gerente:', e)
+            flash('Error al agregar gerente', 'danger')
+            return redirect(url_for('nuevo_gerente_salon'))
+
+    # GET - mostrar formulario
+    return render_template('administrador/nuevo_gerente_salon.html')
+
+#========================================================
+# Ruta para actualizar gerente desde el modal
+#========================================================
+@app.route('/admin/actualizar_gerente', methods=['POST'])
+def actualizar_gerente():
+    id_gerente = request.form.get('id_gerente')
+    apaterno = request.form.get('apaterno')
+    amaterno = request.form.get('amaterno')
+    nombre = request.form.get('nombre')
+    telefono = request.form.get('telefono')
+    email = request.form.get('email')
+
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("""
+            UPDATE GERENTE_SALON
+            SET APATERNO = :1,
+                AMATERNO = :2,
+                NOMBRE = :3,
+                TELEFONO = :4,
+                EMAIL = :5
+            WHERE ID_GERENTE = :6
+        """, (apaterno, amaterno, nombre, telefono, email, id_gerente))
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        flash('Gerente actualizado correctamente', 'success')
+    except Exception as e:
+        print("Error al actualizar gerente:", e)
+        flash('Error al actualizar gerente', 'danger')
+    return redirect(url_for('gerente_salon'))
+
+
+
+
 
 
 if __name__ == '__main__':

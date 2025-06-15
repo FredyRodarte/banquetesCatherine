@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Nuevo Gerente de Salón{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Registrar Nuevo Gerente de Salón</h2>
+    <form method="POST" action="{{ url_for('nuevo_gerente_salon') }}">
+        <div class="mb-3">
+            <label for="apaterno" class="form-label">Apellido Paterno</label>
+            <input type="text" class="form-control" id="apaterno" name="apaterno" required>
+        </div>
+        <div class="mb-3">
+            <label for="amaterno" class="form-label">Apellido Materno</label>
+            <input type="text" class="form-control" id="amaterno" name="amaterno" required>
+        </div>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" required>
+        </div>
+        <div class="mb-3">
+            <label for="telefono" class="form-label">Teléfono</label>
+            <input type="text" class="form-control" id="telefono" name="telefono" required>
+        </div>
+        <div class="mb-3">
+            <label for="email" class="form-label">Correo Electrónico</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+        </div>
+        <button type="submit" class="btn btn-primary">Guardar</button>
+        <a href="{{ url_for('gerente_salon') }}" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
+{% endblock %}
+
+
