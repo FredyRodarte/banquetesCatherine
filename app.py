@@ -723,7 +723,7 @@ def actualizar_gerente():
 
 
 #=======================================================
-# Ruta para mostrar Salones
+# Ruta para mostrar Salones disponibles a cliente
 #========================================================
 @app.route('/salones_public')
 def salones_public():
@@ -739,7 +739,7 @@ def salones_public():
         for row in resultados:
             nombre = row[1]
             nombre_lower = nombre.lower()
-            
+
             if 'diamante' in nombre_lower:
                 imagen = 'Diamante.jpeg'
             elif 'esmeralda' in nombre_lower:
@@ -762,6 +762,120 @@ def salones_public():
     except Exception as e:
         print(f"❌ Error al cargar salones públicos: {e}")
         return "Error cargando salones", 500
+    
+#=======================================================
+# Ruta para mostrar Banquetes disponibles a cliente
+#========================================================
+@app.route('/banquetes_public')
+def banquetes_public():
+    try:
+        cursor.execute("""
+            SELECT ID_PLATILLO, NOMBRE_PLATILLO, PORCIONES, DIFICULTAD, ORIGEN_PLATILLO
+            FROM PLATILLO
+        """)
+        resultados = cursor.fetchall()
+
+        banquetes = []
+        for row in resultados:
+            nombre = row[1]
+            imagen_nombre = nombre.strip() + ".jpeg"
+
+            banquetes.append({
+                'id': row[0],
+                'nombre': nombre,
+                'porciones': row[2],
+                'dificultad': row[3],
+                'origen': row[4],
+                'imagen': imagen_nombre
+            })
+
+        return render_template('publicos/banquetes_cliente.html', banquetes=banquetes)
+
+    except Exception as e:
+        print(f"❌ Error al cargar banquetes: {e}")
+        return "Error cargando banquetes", 500
+
+#=======================================================
+# Ruta para mostrar Complementos disponibles a cliente
+#========================================================
+@app.route('/complementos_public')
+def complementos_public():
+    try:
+        cursor.execute("""
+            SELECT ID_COMPLEMENTO, NOMBRE_COMPLEMENTO, UNIDAD_MEDIDA, PRESENTACION, CANTIDAD
+            FROM COMPLEMENTO
+        """)
+        resultados = cursor.fetchall()
+
+        complementos = []
+        for row in resultados:
+            nombre = row[1]
+            imagen_nombre = nombre.strip() + ".jpeg"
+
+            complementos.append({
+                'id': row[0],
+                'nombre': nombre,
+                'unidad': row[2],
+                'presentacion': row[3],
+                'cantidad': row[4],
+                'imagen': imagen_nombre
+            })
+
+        return render_template('publicos/complementos_cliente.html', complementos=complementos)
+
+    except Exception as e:
+        print(f"❌ Error al cargar complementos: {e}")
+        return "Error cargando complementos", 500
+
+#=======================================================
+# Funciones auxiliares para cotización
+#=======================================================
+def obtener_salones():
+    cursor.execute("SELECT ID_SALON, NOMBRE_SALON FROM SALON")
+    return cursor.fetchall()
+
+def obtener_platillos():
+    cursor.execute("SELECT ID_PLATILLO, NOMBRE_PLATILLO FROM PLATILLO")
+    return cursor.fetchall()
+
+def obtener_complementos():
+    cursor.execute("SELECT ID_COMPLEMENTO, NOMBRE_COMPLEMENTO FROM COMPLEMENTO")
+    return cursor.fetchall()
+
+#=======================================================
+# Ruta para hacer cotización
+#========================================================
+
+@app.route('/cotizar', methods=['POST'])
+def cotizar():
+    salon_id = request.form['salon_id']
+    platillo_id = request.form['platillo_id']
+    complemento_id = request.form['complemento_id']
+
+    try:
+        total = 0
+
+        # Precio salón
+        cursor.execute("SELECT PRECIO FROM SALON WHERE ID_SALON = :id", [salon_id])
+        precio_salon = cursor.fetchone()[0]
+        total += precio_salon
+
+        # Precio platillo
+        cursor.execute("SELECT PRECIO FROM PLATILLO WHERE ID_PLATILLO = :id", [platillo_id])
+        precio_platillo = cursor.fetchone()[0]
+        total += precio_platillo
+
+        # Precio complemento
+        cursor.execute("SELECT PRECIO FROM COMPLEMENTO WHERE ID_COMPLEMENTO = :id", [complemento_id])
+        precio_complemento = cursor.fetchone()[0]
+        total += precio_complemento
+
+        # Recarga index con resultado
+        return render_template('index.html', total=total, salones=obtener_salones(), platillos=obtener_platillos(), complementos=obtener_complementos())
+
+    except Exception as e:
+        print(f"Error al calcular cotización: {e}")
+        return "Error en cotización", 500
 
 
 if __name__ == '__main__':

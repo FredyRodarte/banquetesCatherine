@@ -129,7 +129,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Banquetes</h5>
                         <p class="card-text">Menús personalizados para tu evento.</p>
-                        <a class="btn btn-outline-primary mt-2">Ver más</a>
+                        <a href="{{ url_for('banquetes_public') }}" class="btn btn-outline-primary mt-2">Ver más</a>
                     </div>
                 </div>
             </div>
@@ -191,7 +191,7 @@
                     <div class="card-body">
                         <h5 class="card-title">Complementos</h5>
                         <p class="card-text">Todo para tus eventos.</p>
-                        <a class="btn btn-outline-primary mt-2">Ver más</a>
+                        <a href="{{ url_for('complementos_public') }}" class="btn btn-outline-primary mt-2">Ver más</a>
                     </div>
                 </div>
             </div>
@@ -231,6 +231,58 @@
         </div> -->
     </div>
 </section>
+
+<!-- Cotización -->
+<section id="cotizacion" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-5">Cotiza tu Evento</h2>
+        <form method="POST" action="{{ url_for('cotizar') }}">
+            <div class="row g-3">
+                <!-- Salón -->
+                <div class="col-md-4">
+                    <label for="salon" class="form-label">Salón</label>
+                    <select class="form-select" name="salon_id" required>
+                        <option value="">Selecciona un salón</option>
+                        {% for salon in salones %}
+                            <option value="{{ salon.id }}">{{ salon.nombre }} (${{ salon.precio }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- Platillo -->
+                <div class="col-md-4">
+                    <label for="platillo" class="form-label">Platillo</label>
+                    <select class="form-select" name="platillo_id" required>
+                        <option value="">Selecciona un platillo</option>
+                        {% for platillo in platillos %}
+                            <option value="{{ platillo.id }}">{{ platillo.nombre }} (${{ platillo.precio }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <!-- Complemento -->
+                <div class="col-md-4">
+                    <label for="complemento" class="form-label">Complemento</label>
+                    <select class="form-select" name="complemento_id" required>
+                        <option value="">Selecciona un complemento</option>
+                        {% for complemento in complementos %}
+                            <option value="{{ complemento.id }}">{{ complemento.nombre }} (${{ complemento.precio }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">Calcular Total</button>
+            </div>
+
+            {% if total %}
+            <div class="alert alert-success mt-4 text-center">
+                <strong>Total estimado:</strong> ${{ total }}
+            </div>
+            {% endif %}
+        </form>
+    </div>
+</section>
+
 
 <!-- Sobre la Chef -->
 <section class="py-5">
