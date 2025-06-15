@@ -458,15 +458,30 @@ def eliminar_ingrediente(id):
 #=======================================================
 # Ruta base para el Gerente de Proyecto
 #========================================================
-@app.route('/admin/gerente_proyecto')
-def dashboard_gerente():
-    # Datos simulados 
-    proyectos = [
-        {"nombre": "Boda González", "fecha": "2025-07-12", "estatus": "En preparación"},
-        {"nombre": "Conferencia Tech", "fecha": "2025-08-01", "estatus": "Confirmado"},
-        {"nombre": "Graduación UNAM", "fecha": "2025-06-28", "estatus": "Finalizado"}
-    ]
-    return render_template('administrador/gerente_proyecto.html', proyectos=proyectos)
+# @app.route('/admin/gerente_proyecto')
+# def dashboard_gerente():
+#     # Datos simulados 
+#     proyectos = [
+#         {"nombre": "Boda González", "fecha": "2025-07-12", "estatus": "En preparación"},
+#         {"nombre": "Conferencia Tech", "fecha": "2025-08-01", "estatus": "Confirmado"},
+#         {"nombre": "Graduación UNAM", "fecha": "2025-06-28", "estatus": "Finalizado"}
+#     ]
+#     return render_template('administrador/gerente_proyecto.html', proyectos=proyectos)
+@app.route('/debug/usuarios')
+def debug_usuarios():
+    cursor.execute("SELECT id_usuario, rfc, pass, rol FROM usuario")
+    usuarios = cursor.fetchall()
+
+    for row in usuarios:
+        print(f"ID: {row[0]}, RFC: {row[1]}, PASS: {row[2]}, ROL: {row[3]}")
+
+    return "Consulta de usuarios realizada. Revisa la consola."
+
+
+
+
+
+
 
 #=======================================================
 # Ruta base para Salones
@@ -945,7 +960,7 @@ def login():
 
     return render_template('login.html')
 
-
+###########Vista cliente
 
 @app.route('/cliente/proyectos')
 def vista_cliente():
@@ -975,16 +990,22 @@ def vista_cliente():
 
         return render_template("cliente/proyectos_cliente.html", proyectos=proyectos)
 
-    # except Exception as e:
-    #     print("Error cliente:", e)
-    #     return "Error cargando proyectos"
     except Exception as e:
-        import traceback
         print("Error cliente:", e)
-        traceback.print_exc()  # Esto imprimirá la traza completa
         return "Error cargando proyectos"
+
+
+##########Vista Gerente
+@app.route('/gerente/dashboard')
+def dashboard_gerente():
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    return render_template('gerente/dashboard.html')
+
+
 #========================================================
-# Ruta para El logIn
+# Ruta para El logOut
 #========================================================
 @app.route('/logout')
 def logout():

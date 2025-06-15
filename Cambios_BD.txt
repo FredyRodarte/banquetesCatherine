@@ -1,0 +1,80 @@
+---Crear tabla de Gerente_Proyecto(que sera el super usurario)
+
+
+
+----------------------------------------------------------------------
+ALTER TABLE GERENTE_SALON RENAME COLUMN ID_GERENTE TO ID_GERENTE_S;
+
+ALTER TABLE SALON DROP CONSTRAINT FK_SALON_G_SALON;
+
+ALTER TABLE SALON RENAME COLUMN ID_GERENTEP TO ID_GERENTE_S;
+
+DELETE FROM SALON;
+
+
+ALTER TABLE SALON ADD CONSTRAINT FK_SALON_G_SALON
+FOREIGN KEY (ID_GERENTE_S)
+REFERENCES GERENTE_SALON(ID_GERENTE_S);
+
+-----------------Para implementear el logIn--------------------------------------------------
+
+
+ALTER TABLE usuario ADD rol VARCHAR2(20);
+
+-- Actualizar roles para pruebas
+UPDATE usuario SET rol = 'cliente' WHERE id_usuario LIKE 'UG-%';
+UPDATE usuario SET rol = 'gerente_evento' WHERE id_usuario LIKE 'GE-%';
+UPDATE usuario SET rol = 'gerente_salon' WHERE id_usuario LIKE 'GS-%';
+UPDATE usuario SET rol = 'jefe' WHERE id_usuario = 'JE-0001';
+COMMIT;
+
+
+----crear usuarios con distintos roles para ver si funciona el logIn en todos los roles----------
+
+INSERT INTO usuario (
+    id_usuario, rfc, curp, pass, apaterno, amaterno, nombre, calle, numero, localidad,
+    municipio, estado, c_postal, ULTIMO_ACCESO, estatus, rol
+) VALUES (
+    'GE-0001', 'RFCGERENTE01', 'CURPGERENTEEVENTO1', 'gerente123', 
+    'González', 'Reyes', 'Carla',
+    'Calle Primavera', '45', 'Zona Centro',
+    'Zacatecas', 'Zacatecas', '98000',
+    TO_DATE('15-JUN-2025', 'DD-MON-YYYY'), 1, 'gerente_evento'
+);
+
+
+
+-- Gerente de Salón
+INSERT INTO usuario (
+    id_usuario, rfc, curp, pass, apaterno, amaterno, nombre, calle, numero, localidad,
+    municipio, estado, c_postal, ULTIMO_ACCESO, estatus, rol
+) VALUES (
+    'GS-0001', 'RFCGERENTESAL', 'CURPGERENTESALON1', 'salon123', 
+    'Martínez', 'López', 'Jorge',
+    'Av. Hidalgo', '78', 'Barrio Alto',
+    'Guadalupe', 'Zacatecas', '98050',
+    TO_DATE('15-JUN-2025', 'DD-MON-YYYY'), 1, 'gerente_salon'
+);
+
+-- Jefe
+INSERT INTO usuario (
+    id_usuario, rfc, curp, pass, apaterno, amaterno, nombre, calle, numero, localidad,
+    municipio, estado, c_postal, ULTIMO_ACCESO, estatus, rol
+) VALUES (
+    'JE-0001', 'RFCJEFE000001', 'CURPJEFE0000001', 'jefe123', 
+    'Hernández', 'Cruz', 'Laura',
+    'Av. Universidad', '9', 'Residencial',
+    'Zacatecas', 'Zacatecas', '98040',
+    TO_DATE('15-JUN-2025', 'DD-MON-YYYY'), 1, 'jefe'
+);
+
+
+
+
+
+----------------Corregir Tabla Proyecto--------------------------------------------------------
+
+ALTER TABLE PROYECTO RENAME COLUMN COMENZALES TO COMENSALES;
+
+
+
