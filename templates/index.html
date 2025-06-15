@@ -244,7 +244,8 @@
                     <select class="form-select" name="salon_id" required>
                         <option value="">Selecciona un salón</option>
                         {% for salon in salones %}
-                            <option value="{{ salon.id }}">{{ salon.nombre }} (${{ salon.precio }})</option>
+                            <option value="{{ salon.id }}">{{ salon.nombre }}</option>
+                            <!-- <option value="{{ salon.id }}">{{ salon.nombre }} (${{ salon.precio }})</option> -->
                         {% endfor %}
                     </select>
                 </div>
@@ -254,7 +255,8 @@
                     <select class="form-select" name="platillo_id" required>
                         <option value="">Selecciona un platillo</option>
                         {% for platillo in platillos %}
-                            <option value="{{ platillo.id }}">{{ platillo.nombre }} (${{ platillo.precio }})</option>
+                            <option value="{{ platillo.id }}">{{ platillo.nombre }} </option>
+                            <!-- <option value="{{ platillo.id }}">{{ platillo.nombre }} (${{ platillo.precio }})</option> -->
                         {% endfor %}
                     </select>
                 </div>
@@ -264,7 +266,8 @@
                     <select class="form-select" name="complemento_id" required>
                         <option value="">Selecciona un complemento</option>
                         {% for complemento in complementos %}
-                            <option value="{{ complemento.id }}">{{ complemento.nombre }} (${{ complemento.precio }})</option>
+                            <option value="{{ complemento.id }}">{{ complemento.nombre }}</option>
+                            <!-- <option value="{{ complemento.id }}">{{ complemento.nombre }} (${{ complemento.precio }})</option> -->
                         {% endfor %}
                     </select>
                 </div>

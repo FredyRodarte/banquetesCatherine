@@ -18,7 +18,11 @@ app.secret_key = 'contraseña'
 @app.route('/')
 def index():
     
-    return render_template('index.html')
+    return render_template(
+        'index.html',
+        salones=obtener_salones(),
+        platillos=obtener_platillos(),
+        complementos=obtener_complementos())
 
 @app.route('/admin/proyectos')
 def admin_proyectos():
@@ -832,50 +836,76 @@ def complementos_public():
 #=======================================================
 def obtener_salones():
     cursor.execute("SELECT ID_SALON, NOMBRE_SALON FROM SALON")
-    return cursor.fetchall()
+    resultados = cursor.fetchall()
+    return [{'id': r[0], 'nombre': r[1]} for r in resultados]
+    # return [{'id': row[0], 'nombre': row[1], 'precio': row[2]} for row in cursor.fetchall()]
 
 def obtener_platillos():
     cursor.execute("SELECT ID_PLATILLO, NOMBRE_PLATILLO FROM PLATILLO")
-    return cursor.fetchall()
+    resultados = cursor.fetchall()
+    return [{'id': r[0], 'nombre': r[1]} for r in resultados]
+    #return [{'id': row[0], 'nombre': row[1], 'precio': row[2]} for row in cursor.fetchall()]
 
 def obtener_complementos():
     cursor.execute("SELECT ID_COMPLEMENTO, NOMBRE_COMPLEMENTO FROM COMPLEMENTO")
-    return cursor.fetchall()
+    resultados = cursor.fetchall()
+    return [{'id': r[0], 'nombre': r[1]} for r in resultados]
+    #return [{'id': row[0], 'nombre': row[1], 'precio': row[2]} for row in  cursor.fetchall()]
+
+    
+
 
 #=======================================================
 # Ruta para hacer cotización
 #========================================================
 
+#temporal
 @app.route('/cotizar', methods=['POST'])
 def cotizar():
-    salon_id = request.form['salon_id']
-    platillo_id = request.form['platillo_id']
-    complemento_id = request.form['complemento_id']
+    return render_template(
+        'index.html',
+        salones=obtener_salones(),
+        platillos=obtener_platillos(),
+        complementos=obtener_complementos()
+    )
 
-    try:
-        total = 0
 
-        # Precio salón
-        cursor.execute("SELECT PRECIO FROM SALON WHERE ID_SALON = :id", [salon_id])
-        precio_salon = cursor.fetchone()[0]
-        total += precio_salon
+# @app.route('/cotizar', methods=['POST'])
+# def cotizar():
+    
 
-        # Precio platillo
-        cursor.execute("SELECT PRECIO FROM PLATILLO WHERE ID_PLATILLO = :id", [platillo_id])
-        precio_platillo = cursor.fetchone()[0]
-        total += precio_platillo
+#     try:
+    
+#         salon_id = request.form['salon_id']
+#         platillo_id = request.form['platillo_id']
+#         complemento_id = request.form['complemento_id']
 
-        # Precio complemento
-        cursor.execute("SELECT PRECIO FROM COMPLEMENTO WHERE ID_COMPLEMENTO = :id", [complemento_id])
-        precio_complemento = cursor.fetchone()[0]
-        total += precio_complemento
+#         # Precio salón
+#         cursor.execute("SELECT PRECIO FROM SALON WHERE ID_SALON = :id", [salon_id])
+#         precio_salon = cursor.fetchone()[0]
+        
 
-        # Recarga index con resultado
-        return render_template('index.html', total=total, salones=obtener_salones(), platillos=obtener_platillos(), complementos=obtener_complementos())
+#         # Precio platillo
+#         cursor.execute("SELECT PRECIO FROM PLATILLO WHERE ID_PLATILLO = :id", [platillo_id])
+#         precio_platillo = cursor.fetchone()[0]
+        
 
-    except Exception as e:
-        print(f"Error al calcular cotización: {e}")
-        return "Error en cotización", 500
+#         # Precio complemento
+#         cursor.execute("SELECT PRECIO FROM COMPLEMENTO WHERE ID_COMPLEMENTO = :id", [complemento_id])
+#         precio_complemento = cursor.fetchone()[0]
+        
+#         total = salon_precio + platillo_precio + complemento_precio
+
+#         return render_template(
+#             'index.html',
+#             salones=obtener_salones(),
+#             platillos=obtener_platillos(),
+#             complementos=obtener_complementos(),
+#             total=total
+#         )
+#     except Exception as e:
+#         print(f"❌ Error al calcular cotización: {e}")
+#         return "Error en la cotización", 500
 
 
 if __name__ == '__main__':
