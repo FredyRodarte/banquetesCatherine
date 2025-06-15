@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, session, request, redirect, url_for, flash
 from datetime import datetime
 import cx_Oracle
 import re
@@ -906,6 +906,93 @@ def cotizar():
 #     except Exception as e:
 #         print(f"❌ Error al calcular cotización: {e}")
 #         return "Error en la cotización", 500
+
+
+#========================================================
+# Ruta para El logIn
+#========================================================
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        usuario = request.form['usuario'].strip()
+        password = request.form['password'].strip()
+
+        cursor.execute("""
+            SELECT id_usuario, nombre, pass, rol FROM usuario 
+            WHERE (rfc = :usuario OR id_usuario = :usuario) AND pass = :password
+        """, {'usuario':usuario, 'password':password})
+
+        user = cursor.fetchone()
+        if user:
+            session['usuario_id'] = user[0]
+            session['nombre'] = user[1]
+            session['rol'] = user[3]
+
+            flash(f"Bienvenido/a, {user[1]}", "success")
+
+            if user[3] == 'cliente':
+                return redirect(url_for('vista_cliente'))
+            elif user[3] in ['gerente_evento', 'gerente_salon']:
+                return redirect(url_for('dashboard_gerente'))
+            elif user[3] == 'jefe':
+                return redirect(url_for('admin_proyectos'))  # puedes cambiar esto por una vista de jefe
+            else:
+                flash("⚠️ Rol no válido.", "danger")
+                return redirect(url_for('login'))
+        else:
+            flash("⚠️ Usuario o contraseña incorrectos.", "danger")
+            return redirect(url_for('login'))
+
+    return render_template('login.html')
+
+
+
+@app.route('/cliente/proyectos')
+def vista_cliente():
+    if 'usuario_id' not in session or session.get('rol') != 'cliente':
+        return redirect(url_for('login'))
+
+    usuario_id = session['usuario_id']
+
+    try:
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
+        cursor1.execute("""
+            SELECT p.ID_PROYECTO, p.COMENSALES, s.NOMBRE_SALON, TO_CHAR(p.FECHA_EVENTO, 'DD/MM/YYYY'), p.ESTATUS_EVENTO
+            FROM proyecto p
+            JOIN salon s ON p.ID_SALON = s.ID_SALON
+            WHERE p.ID_USUARIO = :1
+        """, [usuario_id])
+
+        proyectos = [{
+            'id': row[0],
+            'comensales': row[1],
+            'salon': row[2],
+            'fecha': row[3],
+            'estatus': row[4]
+        } for row in cursor1.fetchall()]
+
+        return render_template("cliente/proyectos_cliente.html", proyectos=proyectos)
+
+    # except Exception as e:
+    #     print("Error cliente:", e)
+    #     return "Error cargando proyectos"
+    except Exception as e:
+        import traceback
+        print("Error cliente:", e)
+        traceback.print_exc()  # Esto imprimirá la traza completa
+        return "Error cargando proyectos"
+#========================================================
+# Ruta para El logIn
+#========================================================
+@app.route('/logout')
+def logout():
+    session.clear()
+    flash("Sesión cerrada correctamente.", "info")
+    return redirect(url_for('index'))
+
+
 
 
 if __name__ == '__main__':

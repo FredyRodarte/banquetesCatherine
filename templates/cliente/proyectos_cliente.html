@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %} Mis Proyectos {% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Mis Proyectos Contratados</h2>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>ID Proyecto</th>
+                    <th>Comensales</th>
+                    <th>Salón</th>
+                    <th>Fecha del Evento</th>
+                    <th>Estatus</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if proyectos %}
+                    {% for proyecto in proyectos %}
+                    <tr>
+                        <td>{{ proyecto.id }}</td>
+                        <td>{{ proyecto.comensales }}</td>
+                        <td>{{ proyecto.salon }}</td>
+                        <td>{{ proyecto.fecha }}</td>
+                        <td>{{ proyecto.estatus }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted">
+                            Por el momento no tienes próximos proyectos.
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
