@@ -17,19 +17,201 @@
     <div class="container">
         <h2 class="text-center mb-5">Nuestros Servicios</h2>
         <div class="row g-4">
+            
             <div class="col-md-4">
-                <div class="card h-100">
+                <!-- Carousel Salones -->
+                <div id="carouselSalones" class="carousel slide" data-bs-ride="carousel">
+
+                <!-- Indicators/dots -->
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselSalones" data-bs-slide-to="0" class="active"></button>
+                    <button type="button" data-bs-target="#carouselSalones" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#carouselSalones" data-bs-slide-to="2"></button>
+                    <button type="button" data-bs-target="#carouselSalones" data-bs-slide-to="3"></button>
+                </div>
+
+                <!-- The slideshow/carousel -->
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                    <img src="{{ url_for('static', filename='img/Salones/Boda.jpeg') }}" class="d-block w-100" alt="Bodas">
+                        <div class="carousel-caption">
+                            <h3>Bodas</h3>
+                            <p>"Dos almas, un camino"</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/Salones/XV.jpeg') }}" class="d-block w-100" alt="XV años">
+                        <div class="carousel-caption">
+                            <h3>XV años</h3>
+                            <p>"Un brindis para celebrar"</p>
+                        </div> 
+                    </div>
+                    <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/Salones/Infantil.jpeg') }}" class="d-block w-100" alt="Infantiles">
+                        <div class="carousel-caption">
+                            <h3>Fiestas Infantiles</h3>
+                            <p>"Celebremos jugando"</p>
+                        </div>  
+                    </div>
+                    <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/Salones/Congreso.jpeg') }}" class="d-block w-100" alt="Congresos">
+                        <div class="carousel-caption">
+                            <h3>Congresos</h3>
+                            <p>"Innovación y conexión"</p>
+                        </div>  
+                    </div>
+                </div>
+
+                <!-- Left and right controls/icons -->
+                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselSalones" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselSalones" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Salones</h5>
+                        <p class="card-text">Elige el espacio que será testigo de tus memorias.</p>
+                        <a href="{{ url_for('salones_public') }}" class="btn btn-outline-primary mt-2">Ver más</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Carousel Banquetes-->
+                <div id="carouselBanquetes" class="carousel slide" data-bs-ride="carousel">
+
+                <!-- Indicators/dots -->
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselBanquetes" data-bs-slide-to="0" class="active"></button>
+                    <button type="button" data-bs-target="#carouselBanquetes" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#carouselBanquetes" data-bs-slide-to="2"></button>
+                </div>
+
+                <!-- The slideshow/carousel -->
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                    <img src="{{ url_for('static', filename='img/Banquetes/plato-destacado1.jpg') }}" class="d-block w-100" alt="Bebidas">
+                    <div class="carousel-caption">
+                        <h3>Bebidas</h3>
+                        <p>"Contamos la mejor carta de vinos"</p>
+                    </div>
+                    </div>
+                    <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/Banquetes/plato-destacado2.jpg') }}" class="d-block w-100" alt="Platillos">
+                    <div class="carousel-caption">
+                        <h3>Menú a 4 tiempos</h3>
+                        <p>"Variedad en sabor y presentación"</p>
+                    </div> 
+                    </div>
+                    <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/Banquetes/plato-destacado3.jpg') }}" class="d-block w-100" alt="Servicios de Café">
+                    <div class="carousel-caption">
+                        <h3>Servicios de café</h3>
+                        <p>"El café más exquisito del mundo"</p>
+                    </div>  
+                    </div>
+                </div>
+
+                <!-- Left and right controls/icons -->
+                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselBanquetes" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselBanquetes" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Banquetes</h5>
+                        <p class="card-text">Menús personalizados para tu evento.</p>
+                        <a class="btn btn-outline-primary mt-2">Ver más</a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <!-- Carousel Complementos -->
+                <div id="carouselComplementos" class="carousel slide" data-bs-ride="carousel">
+
+                <!-- Indicators/dots -->
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselComplementos" data-bs-slide-to="0" class="active"></button>
+                    <button type="button" data-bs-target="#carouselComplementos" data-bs-slide-to="1"></button>
+                    <button type="button" data-bs-target="#carouselComplementos" data-bs-slide-to="2"></button>
+                    <button type="button" data-bs-target="#carouselComplementos" data-bs-slide-to="3"></button>
+                </div>
+
+                <!-- The slideshow/carousel -->
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                    <img src="{{ url_for('static', filename='img/Complementos/Música.jpeg') }}" class="d-block w-100" alt="Música">
+                        <div class="carousel-caption">
+                            <h3>Música</h3>
+                            <p>"DJ y +"</p>
+                        </div>
+                    </div>
+                    <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/Complementos/Fotografía.jpeg') }}" class="d-block w-100" alt="Fotografía">
+                        <div class="carousel-caption">
+                            <h3>Fotografía</h3>
+                            <p>"Cabinas, espejos y +"</p>
+                        </div> 
+                    </div>
+                    <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/Complementos/Inflables.jpeg') }}" class="d-block w-100" alt="Inflables">
+                        <div class="carousel-caption">
+                            <h3>Inflables</h3>
+                            <p>"Infantiles y +"</p>
+                        </div>  
+                    </div>
+                    <div class="carousel-item">
+                    <img src="{{ url_for('static', filename='img/Complementos/Stands.jpeg') }}" class="d-block w-100" alt="Stands">
+                        <div class="carousel-caption">
+                            <h3>Stands</h3>
+                            <p>"Mamparas, pantallas y +"</p>
+                        </div>  
+                    </div>
+                </div>
+
+                <!-- Left and right controls/icons -->
+                 <button class="carousel-control-prev" type="button" data-bs-target="#carouselComplementos" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselComplementos" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+                </div>
+                
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h5 class="card-title">Complementos</h5>
+                        <p class="card-text">Todo para tus eventos.</p>
+                        <a class="btn btn-outline-primary mt-2">Ver más</a>
+                    </div>
+                </div>
+            </div>
+
+        <!-- <div class="card h-100">
                     <img src="{{ url_for('static', filename='img/plato-destacado1.jpg') }}" class="card-img-top" alt="Banquete para bodas">
                     <div class="card-body">
+                        <h5 class="card-title">Salones</h5>
+                        <p class="card-text">Elige el espacio que será testigo de tus memorias.</p>
                         <h5 class="card-title">Bodas</h5>
                         <p class="card-text">Menús personalizados para tu día especial.</p>
                     </div>
-                </div>
+                </div> 
             </div>
             <div class="col-md-4">
                 <div class="card h-100">
                     <img src="{{ url_for('static', filename='img/plato-destacado2.jpg') }}" class="card-img-top" alt="Eventos corporativos">
                     <div class="card-body">
+                        <h5 class="card-title">Platillos</h5>
+                        <p class="card-text">Menús personalizados para tu día especial.</p>
                         <h5 class="card-title">Eventos Corporativos</h5>
                         <p class="card-text">Catering profesional para empresas.</p>
                     </div>
@@ -39,12 +221,14 @@
                 <div class="card h-100">
                     <img src="{{ url_for('static', filename='img/plato-destacado3.jpg') }}" class="card-img-top" alt="Fiestas privadas">
                     <div class="card-body">
+                        <h5 class="card-title">Algo más...</h5>
+                        <p class="card-text">Conoce nuestros contactos con empresas para embellecer tus eventos</p>
                         <h5 class="card-title">Fiestas Privadas</h5>
                         <p class="card-text">Experiencia culinaria única en tu hogar.</p>
                     </div>
                 </div>
-            </div>
-        </div>
+            </div> 
+        </div> -->
     </div>
 </section>
 
