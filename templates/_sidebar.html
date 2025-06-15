@@ -38,9 +38,25 @@
                 <li class="nav-item">
                 <a class="nav-link" href="/admin/gerente_salon">🧑‍💼 Gerente Salón</a>
                 </li>
-
-
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('login') }}">🔑 Iniciar Sesión</a>
+                </li>
             </ul>
+            <!-- Mostrar rol si está logueado -->
+                {% if session.get('usuario_id') %}
+                    <li class="nav-item disabled text-white ps-3">
+                        <small>Rol: {{ session.get('rol').replace('_', ' ')|capitalize }}</small>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('logout') }}">🚪 Cerrar sesión</a>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">🔑 Iniciar sesión</a>
+                    </li>
+                {% endif %}
+
+
         </div>
     </div>
 </nav>
