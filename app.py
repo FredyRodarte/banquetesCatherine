@@ -945,10 +945,14 @@ def vista_cliente():
 
         return render_template("cliente/proyectos_cliente.html", proyectos=proyectos)
 
+    # except Exception as e:
+    #     print("Error cliente:", e)
+    #     return "Error cargando proyectos"
     except Exception as e:
+        import traceback
         print("Error cliente:", e)
+        traceback.print_exc()  # Esto imprimirá la traza completa
         return "Error cargando proyectos"
-
 #========================================================
 # Ruta para El logIn
 #========================================================

@@ -38,9 +38,9 @@
                 <li class="nav-item">
                 <a class="nav-link" href="/admin/gerente_salon">🧑‍💼 Gerente Salón</a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('login') }}">🔑 Iniciar Sesión</a>
-                </li>
+                </li> -->
             </ul>
             <!-- Mostrar rol si está logueado -->
                 {% if session.get('usuario_id') %}
@@ -55,8 +55,11 @@
                         <a class="nav-link" href="{{ url_for('login') }}">🔑 Iniciar sesión</a>
                     </li>
                 {% endif %}
-
-
+                {% if session.get('rol') == 'cliente' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('vista_cliente') }}">📄 Mis Proyectos</a>
+                    </li>
+                {% endif %}
         </div>
     </div>
 </nav>
