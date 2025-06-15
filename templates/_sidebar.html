@@ -9,40 +9,52 @@
 
         <div class="collapse navbar-collapse" id="navbarContenido">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <!-- Accesible para todos -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('index')}}">🏠 Inicio</a>
+                    <a class="nav-link" href="{{ url_for('index') }}">🏠 Inicio</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('admin_proyectos')}}">💻 Proyectos</a>
+                    <a class="nav-link" href="{{ url_for('complementos_public') }}">🧺​ Complementos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('admin_complementos')}}">🧺​ Complementos</a>
+                    <a class="nav-link" href="{{ url_for('salones_public') }}">🏛️ Salones</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('listar_usuario')}}">👤 Usuario</a>
+                    <a class="nav-link" href="{{ url_for('banquetes_public') }}">📦 banquetes</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{url_for('lista_ingredientes')}}">📋Ingredientes</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin/gerente_proyecto">🧑‍💼 Gerente de Proyecto</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin/salones">🏛️ Salones</a>
+                    <a class="nav-link" href="/admin/paquetes">📦 Paquetes</a>
                 </li>
 
-                <li class="nav-item">
-                <a class="nav-link" href="/admin/paquetes">📦 Paquetes</a>
-                </li>
 
-                <li class="nav-item">
-                <a class="nav-link" href="/admin/gerente_salon">🧑‍💼 Gerente Salón</a>
-                </li>
-                <!-- <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('login') }}">🔑 Iniciar Sesión</a>
-                </li> -->
+                {% if session.get('rol') == 'cliente' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('vista_cliente') }}">📄 Mis Proyectos</a>
+                    </li>
+                {% elif session.get('rol') in ['gerente_evento', 'gerente_salon', 'jefe'] %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_proyectos') }}">💻 Proyectos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/gerente_proyecto">🧑‍💼 Gerente de Proyecto</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin/gerente_salon">🧑‍💼 Gerente Salón</a>
+                    </li>
+                {% endif %}
+
+                {% if session.get('rol') == 'jefe' %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('listar_usuario') }}">👤 Usuario</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('lista_ingredientes') }}">📋 Ingredientes</a>
+                    </li>
+                {% endif %}
             </ul>
-            <!-- Mostrar rol si está logueado -->
+
+            <!-- Lado derecho: Rol e inicio/cierre de sesión -->
+            <ul class="navbar-nav ms-auto">
                 {% if session.get('usuario_id') %}
                     <li class="nav-item disabled text-white ps-3">
                         <small>Rol: {{ session.get('rol').replace('_', ' ')|capitalize }}</small>
@@ -55,11 +67,7 @@
                         <a class="nav-link" href="{{ url_for('login') }}">🔑 Iniciar sesión</a>
                     </li>
                 {% endif %}
-                {% if session.get('rol') == 'cliente' %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('vista_cliente') }}">📄 Mis Proyectos</a>
-                    </li>
-                {% endif %}
+            </ul>
         </div>
     </div>
 </nav>
