@@ -662,6 +662,55 @@ def complementos_public():
         print(f"❌ Error al cargar complementos: {e}")
         return "Error cargando complementos", 500
 
+#=======================================================
+# Funciones auxiliares para cotización
+#=======================================================
+def obtener_salones():
+    cursor.execute("SELECT ID_SALON, NOMBRE_SALON FROM SALON")
+    return cursor.fetchall()
+
+def obtener_platillos():
+    cursor.execute("SELECT ID_PLATILLO, NOMBRE_PLATILLO FROM PLATILLO")
+    return cursor.fetchall()
+
+def obtener_complementos():
+    cursor.execute("SELECT ID_COMPLEMENTO, NOMBRE_COMPLEMENTO FROM COMPLEMENTO")
+    return cursor.fetchall()
+
+#=======================================================
+# Ruta para hacer cotización
+#========================================================
+
+@app.route('/cotizar', methods=['POST'])
+def cotizar():
+    salon_id = request.form['salon_id']
+    platillo_id = request.form['platillo_id']
+    complemento_id = request.form['complemento_id']
+
+    try:
+        total = 0
+
+        # Precio salón
+        cursor.execute("SELECT PRECIO FROM SALON WHERE ID_SALON = :id", [salon_id])
+        precio_salon = cursor.fetchone()[0]
+        total += precio_salon
+
+        # Precio platillo
+        cursor.execute("SELECT PRECIO FROM PLATILLO WHERE ID_PLATILLO = :id", [platillo_id])
+        precio_platillo = cursor.fetchone()[0]
+        total += precio_platillo
+
+        # Precio complemento
+        cursor.execute("SELECT PRECIO FROM COMPLEMENTO WHERE ID_COMPLEMENTO = :id", [complemento_id])
+        precio_complemento = cursor.fetchone()[0]
+        total += precio_complemento
+
+        # Recarga index con resultado
+        return render_template('index.html', total=total, salones=obtener_salones(), platillos=obtener_platillos(), complementos=obtener_complementos())
+
+    except Exception as e:
+        print(f"Error al calcular cotización: {e}")
+        return "Error en cotización", 500
 
 
 if __name__ == '__main__':
