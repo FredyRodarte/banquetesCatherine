@@ -558,6 +558,43 @@ def nuevo_salon():
         return "Error al cargar formulario", 500
     
 
+#=======================================================
+# Ruta para mostrar Paquetes
+#========================================================
+
+@app.route('/admin/paquetes')
+def admin_paquetes():
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+
+        query_platillos = "SELECT NOMBRE_PLATILLO FROM platillo ORDER BY NOMBRE_PLATILLO"
+        cursor.execute(query_platillos)
+        platillos_rows = cursor.fetchall()
+        platillos = [{'nombre_platillo': r[0]} for r in platillos_rows]
+
+        query_complementos = "SELECT NOMBRE_COMPLEMENTO FROM complemento ORDER BY NOMBRE_COMPLEMENTO"
+        cursor.execute(query_complementos)
+        complementos_rows = cursor.fetchall()
+        complementos = [{'nombre_complemento': r[0]} for r in complementos_rows]
+
+        query_salones = "SELECT NOMBRE_SALON, CAPACIDAD FROM salon ORDER BY NOMBRE_SALON"
+        cursor.execute(query_salones)
+        salones_rows = cursor.fetchall()
+        salones = [{'nombre_salon': r[0], 'capacidad': r[1]} for r in salones_rows]
+
+        cursor.close()
+        conexion.close()
+
+        return render_template('administrador/paquetes.html', 
+                               platillos=platillos, 
+                               complementos=complementos, 
+                               salones=salones)
+    except Exception as e:
+        print("Error al cargar datos de paquetes:", e)
+        return f"Error al cargar datos de paquetes: {e}"
+
+
 
 #=======================================================
 # Función para generar ID único para nuevo gerente
