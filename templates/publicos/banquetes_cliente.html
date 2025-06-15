@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block title %}Nuestros Banquetes{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h2 class="text-center mb-5">Menú de Banquetes</h2>
+    <div class="row g-4">
+        {% for banquete in banquetes %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 shadow-sm">
+                <img src="{{ url_for('static', filename='img/Banquetes/' + banquete.imagen) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="{{ banquete.nombre }}">
+                <div class="card-body">
+                    <h5 class="card-title">{{ banquete.nombre }}</h5>
+                    <p class="card-text"><strong>Porciones:</strong> {{ banquete.porciones }}</p>
+                    <p class="card-text"><strong>Dificultad:</strong> {{ banquete.dificultad }}</p>
+                    <p class="card-text"><strong>Origen:</strong> {{ banquete.origen }}</p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

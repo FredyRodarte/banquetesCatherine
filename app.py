@@ -558,7 +558,7 @@ def nuevo_salon():
         return "Error al cargar formulario", 500
 
 #=======================================================
-# Ruta para mostrar Salones
+# Ruta para mostrar Salones disponibles a cliente
 #========================================================
 @app.route('/salones_public')
 def salones_public():
@@ -574,7 +574,7 @@ def salones_public():
         for row in resultados:
             nombre = row[1]
             nombre_lower = nombre.lower()
-            
+
             if 'diamante' in nombre_lower:
                 imagen = 'Diamante.jpeg'
             elif 'esmeralda' in nombre_lower:
@@ -597,6 +597,71 @@ def salones_public():
     except Exception as e:
         print(f"❌ Error al cargar salones públicos: {e}")
         return "Error cargando salones", 500
+    
+#=======================================================
+# Ruta para mostrar Banquetes disponibles a cliente
+#========================================================
+@app.route('/banquetes_public')
+def banquetes_public():
+    try:
+        cursor.execute("""
+            SELECT ID_PLATILLO, NOMBRE_PLATILLO, PORCIONES, DIFICULTAD, ORIGEN_PLATILLO
+            FROM PLATILLO
+        """)
+        resultados = cursor.fetchall()
+
+        banquetes = []
+        for row in resultados:
+            nombre = row[1]
+            imagen_nombre = nombre.strip() + ".jpeg"
+
+            banquetes.append({
+                'id': row[0],
+                'nombre': nombre,
+                'porciones': row[2],
+                'dificultad': row[3],
+                'origen': row[4],
+                'imagen': imagen_nombre
+            })
+
+        return render_template('publicos/banquetes_cliente.html', banquetes=banquetes)
+
+    except Exception as e:
+        print(f"❌ Error al cargar banquetes: {e}")
+        return "Error cargando banquetes", 500
+
+#=======================================================
+# Ruta para mostrar Complementos disponibles a cliente
+#========================================================
+@app.route('/complementos_public')
+def complementos_public():
+    try:
+        cursor.execute("""
+            SELECT ID_COMPLEMENTO, NOMBRE_COMPLEMENTO, UNIDAD_MEDIDA, PRESENTACION, CANTIDAD
+            FROM COMPLEMENTO
+        """)
+        resultados = cursor.fetchall()
+
+        complementos = []
+        for row in resultados:
+            nombre = row[1]
+            imagen_nombre = nombre.strip() + ".jpeg"
+
+            complementos.append({
+                'id': row[0],
+                'nombre': nombre,
+                'unidad': row[2],
+                'presentacion': row[3],
+                'cantidad': row[4],
+                'imagen': imagen_nombre
+            })
+
+        return render_template('publicos/complementos_cliente.html', complementos=complementos)
+
+    except Exception as e:
+        print(f"❌ Error al cargar complementos: {e}")
+        return "Error cargando complementos", 500
+
 
 
 if __name__ == '__main__':
