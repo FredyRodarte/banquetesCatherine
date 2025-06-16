@@ -2,6 +2,7 @@ from flask import Flask, render_template, session, request, redirect, url_for, f
 from datetime import datetime
 import cx_Oracle
 import re
+from flask import render_template
 import os
 from werkzeug.utils import secure_filename
 
@@ -742,6 +743,138 @@ def nuevo_salon():
 #=======================================================
 # Ruta para mostrar Paquetes
 #========================================================
+
+# Rutas para Platillos Michi
+# --- Rutas para Platillos 
+@app.route('/admin/platillos')  # Asegúrate que coincida exactamente
+def platillos():
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT ID_PLATILLO, NOMBRE_PLATILLO, PORCIONES, DIFICULTAD FROM PLATILLO")
+        platillos = []
+        for row in cursor:
+            platillos.append({
+                'id': row[0],
+                'nombre': row[1],
+                'porciones': row[2],
+                'dificultad': row[3]
+            })
+        return render_template('administrador/platillos.html', platillos=platillos)  # Asegúrate del return
+    except Exception as e:
+        flash(f"Error: {str(e)}", "danger")
+        return redirect(url_for('index'))  # Siempre retorna algo
+    finally:
+        cursor.close()
+        conexion.close()
+    
+
+@app.route('/admin/platillos/nuevo', methods=['GET'])
+def nuevo_platillo():
+    return render_template('administrador/nuevo_platillo.html')
+
+@app.route('/admin/platillos/guardar', methods=['POST'])
+def guardar_platillo():
+    # Implementación para guardar nuevo platillo
+    pass
+
+@app.route('/admin/platillos/editar/<int:id>', methods=['GET'])
+def editar_platillo(id):
+    # Implementación para editar platillo
+    pass
+
+@app.route('/admin/platillos/actualizar/<int:id>', methods=['POST'])
+def actualizar_platillo(id):
+    # Implementación para actualizar platillo
+    pass
+
+
+@app.route('/admin/platillos/populares')
+def platillos_populares():
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        
+        # Consulta para platillos más populares
+        cursor.execute("""
+            SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
+            FROM PLATILLO p
+            LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
+            LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
+            LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
+            GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
+            ORDER BY total DESC
+        """)
+        
+        populares = []
+        for row in cursor:
+            populares.append({
+                'id': row[0],
+                'nombre': row[1],
+                'total': row[2]
+            })
+        
+        # Consulta para platillos menos populares
+        cursor.execute("""
+            SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
+            FROM PLATILLO p
+            LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
+            LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
+            LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
+            GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
+            ORDER BY total ASC
+        """)
+        
+        menos_populares = []
+        for row in cursor:
+            menos_populares.append({
+                'id': row[0],
+                'nombre': row[1],
+                'total': row[2]
+            })
+        
+        return render_template('administrador/enlistar_platillos.html',
+                             populares=populares,
+                             menos_populares=menos_populares)
+        
+    except cx_Oracle.Error as error:
+        flash(f'Error al cargar platillos populares: {error}', 'danger')
+        return redirect(url_for('platillos'))
+    finally:
+        cursor.close()
+        conexion.close()
+
+# --- Rutas para Instrucciones 
+@app.route('/admin/platillos/<int:id>/instrucciones')
+def ver_instrucciones(id):
+    # Tu implementación actual
+    pass
+
+@app.route('/admin/platillos/<int:id_platillo>/instrucciones/nueva', methods=['GET'])
+def agregar_instruccion(id_platillo):
+    return render_template('administrador/nueva_instruccion.html', 
+                         platillo={'id': id_platillo, 'nombre': "Nombre del Platillo"})
+
+@app.route('/admin/platillos/<int:id_platillo>/instrucciones/guardar', methods=['POST'])
+def guardar_instruccion(id_platillo):
+    # Implementación para guardar nueva instrucción
+    pass
+
+@app.route('/admin/instrucciones/editar/<int:id>', methods=['GET'])
+def editar_instruccion(id):
+    # Implementación para editar instrucción
+    pass
+
+@app.route('/admin/instrucciones/actualizar/<int:id>', methods=['POST'])
+def actualizar_instruccion(id):
+    # Implementación para actualizar instrucción
+    pass
+
+@app.route('/admin/instrucciones/eliminar/<int:id>', methods=['POST'])
+def eliminar_instruccion(id):
+    # Implementación para eliminar instrucción
+    pass
+
 
 @app.route('/admin/paquetes')
 def admin_paquetes():
