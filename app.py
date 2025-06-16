@@ -1275,17 +1275,50 @@ def admin_paquetes():
         conexion = get_db_connection()
         cursor = conexion.cursor()
 
-        query_platillos = "SELECT NOMBRE_PLATILLO FROM platillo ORDER BY NOMBRE_PLATILLO"
+        # Consulta para platillos normales
+        query_platillos = "SELECT NOMBRE_PLATILLO FROM BANQUETES.PLATILLO ORDER BY NOMBRE_PLATILLO"
         cursor.execute(query_platillos)
         platillos_rows = cursor.fetchall()
         platillos = [{'nombre_platillo': r[0]} for r in platillos_rows]
 
-        query_complementos = "SELECT NOMBRE_COMPLEMENTO FROM complemento ORDER BY NOMBRE_COMPLEMENTO"
+        # Consulta para platillos populares (IDs 1, 2, 3)
+        cursor.execute("""
+            SELECT ID_PLATILLO, NOMBRE_PLATILLO 
+            FROM BANQUETES.PLATILLO 
+            WHERE ID_PLATILLO IN (1, 2, 3)
+            ORDER BY ID_PLATILLO
+        """)
+        populares_rows = cursor.fetchall()
+        populares = [
+            {'id': row[0], 'nombre': row[1], 'popularidad': '⭐️⭐️⭐️⭐️⭐️' if row[0] == 1 else 
+                         '⭐️⭐️⭐️⭐️' if row[0] == 2 else '⭐️⭐️⭐️'}
+            for row in populares_rows
+        ]
+
+        # Consulta para platillos menos populares (últimos 3)
+        cursor.execute("""
+            SELECT ID_PLATILLO, NOMBRE_PLATILLO 
+            FROM (
+                SELECT ID_PLATILLO, NOMBRE_PLATILLO 
+                FROM BANQUETES.PLATILLO 
+                ORDER BY ID_PLATILLO DESC
+            ) 
+            WHERE ROWNUM <= 3
+            ORDER BY ID_PLATILLO
+        """)
+        menos_populares_rows = cursor.fetchall()
+        menos_populares = [
+            {'id': row[0], 'nombre': row[1], 'popularidad': '⭐️'}
+            for row in menos_populares_rows
+        ]
+
+        # Resto de consultas (complementos y salones)
+        query_complementos = "SELECT NOMBRE_COMPLEMENTO FROM BANQUETES.COMPLEMENTO ORDER BY NOMBRE_COMPLEMENTO"
         cursor.execute(query_complementos)
         complementos_rows = cursor.fetchall()
         complementos = [{'nombre_complemento': r[0]} for r in complementos_rows]
 
-        query_salones = "SELECT NOMBRE_SALON, CAPACIDAD FROM salon ORDER BY NOMBRE_SALON"
+        query_salones = "SELECT NOMBRE_SALON, CAPACIDAD FROM BANQUETES.SALON ORDER BY NOMBRE_SALON"
         cursor.execute(query_salones)
         salones_rows = cursor.fetchall()
         salones = [{'nombre_salon': r[0], 'capacidad': r[1]} for r in salones_rows]
@@ -1294,12 +1327,15 @@ def admin_paquetes():
         conexion.close()
 
         return render_template('administrador/paquetes.html', 
-                               platillos=platillos, 
-                               complementos=complementos, 
-                               salones=salones)
+                            platillos=platillos, 
+                            complementos=complementos, 
+                            salones=salones,
+                            populares=populares,
+                            menos_populares=menos_populares)
     except Exception as e:
         print("Error al cargar datos de paquetes:", e)
-        return f"Error al cargar datos de paquetes: {e}"
+        flash(f"Error al cargar datos de paquetes: {e}", "danger")
+        return redirect(url_for('index'))
 
 
 

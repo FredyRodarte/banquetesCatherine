@@ -1,74 +1,173 @@
 {% extends 'base.html' %}
 
-{% block title %}Paquetes existentes{% endblock %}
+{% block title %}Paquetes{% endblock %}
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4 text-center"> Paquetes existentes</h2>
+    <h2 class="mb-4">Administración de Paquetes</h2>
 
-    <!-- Tabla de Platillos -->
-    <h4>🍽️ Platillos</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nombre del Platillo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in platillos %}
-                <tr>
-                    <td>{{ p.nombre_platillo }}</td>
-                </tr>
+    <!-- Sección de Platillos Populares -->
+    <div class="card mb-4">
+        <div class="card-header bg-success text-white">
+            </h5 class="mb-0">🥇 Platillos Más Populares</h4>
+        </div>
+        <div class="card-body">
+            {% if populares %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for platillo in populares %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="card-title mb-0">{{ platillo.nombre }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3 text-warning">
+                                {{ platillo.popularidad }}
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                              
+                                </li>
+                                <li class="list-group-item">
+                                    <strong><i class="fas fa-tag"></i> Tipo:</strong> 
+                                    {% if platillo.id == 1 %}Plato fuerte{% endif %}
+                                    {% if platillo.id == 2 %}Especialidad{% endif %}
+                                    {% if platillo.id == 3 %}Opción saludable{% endif %}
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                             <small class="text-muted fw-bold">
+                                👩‍🍳​ Recomendación del chef 🍅
+                            </small>
+                        </div>
+                    </div>
+                </div>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                No se encontraron platillos populares
+            </div>
+            {% endif %}
+        </div>
     </div>
 
-    <!-- Tabla de Complementos -->
-    <h4>🥗 Complementos</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nombre del Complemento</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in complementos %}
-                <tr>
-                    <td>{{ c.nombre_complemento }}</td>
-                </tr>
+    <!-- Sección de Platillos Menos Populares -->
+    <div class="card mb-4">
+        <div class="card-header bg-secondary text-white">
+            </h5 class="mb-0">🥈 Platillos Menos Populares</h4>
+        </div>
+        <div class="card-body">
+            {% if menos_populares %}
+            <div class="row row-cols-1 row-cols-md-3 g-4">
+                {% for platillo in menos_populares %}
+                <div class="col">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-header bg-warning text-dark">
+                            <h5 class="card-title mb-0">{{ platillo.nombre }}</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-3 text-secondary">
+                                {{ platillo.popularidad }}
+                            </div>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">
+                                 
+                                </li>
+                                <li class="list-group-item">
+                                    <strong><i class="fas fa-info-circle"></i> Estado:</strong> 
+                                    Baja demanda
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <small class="text-muted fw-bold">
+                               ⏰ Sugerencia: Promoción especial✨​
+                            </small>
+                        </div>
+                    </div>
+                </div>
                 {% endfor %}
-            </tbody>
-        </table>
+            </div>
+            {% else %}
+            <div class="alert alert-warning">
+                No se encontraron platillos menos populares
+            </div>
+            {% endif %}
+        </div>
     </div>
 
-    <!-- Tabla de Salones -->
-    <h4>🏛️ Salones</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nombre del Salón</th>
-                    <th>Capacidad</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in salones %}
-                <tr>
-                    <td>{{ s.nombre_salon }}</td>
-                    <td>{{ s.capacidad }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    <!-- Resto del contenido de paquetes -->
+    <div class="card">
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">Configuración de Paquetes</h4>
     </div>
+    <div class="card-body">
+        <!-- Tu contenido existente de paquetes aquí -->
+        <div class="mb-3">
+            <h5>Platillos Disponibles</h5>
+            <ul class="list-group">
+                {% for platillo in platillos %}
+                <li class="list-group-item">{{ platillo.nombre_platillo }}</li>
+                {% endfor %}
+            </ul>
+        </div>
 
-    <!-- Mensaje y botón de regreso -->
-    <div class="text-center mt-5">
-        <p class="lead">¿Deseas contratar nuestros servicios? <strong>Contáctanos en la página de inicio.</strong></p>
-        <a href="/" class="btn btn-primary btn-lg">Volver a Inicio</a>
+        <div class="mb-3">
+            <h5>Complementos Disponibles</h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Medida</th>
+                            <th>Presentación</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complemento in complementos %}
+                        <tr>
+                            <td>{{ complemento.id_complemento }}</td>
+                            <td>{{ complemento.nombre }}</td>
+                            <td>{{ complemento.medida }}</td>
+                            <td>{{ complemento.presentacion }}</td>
+                            <td>{{ complemento.cantidad }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <h5>Salones Disponibles</h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Capacidad</th>
+                            <th>Ubicación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for salon in salones %}
+                        <tr>
+                            <td>{{ salon.id }}</td>
+                            <td>{{ salon.nombre }}</td>
+                            <td>{{ salon.capacidad }}</td>
+                            <td>{{ salon.ubicacion }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        </div>
     </div>
 </div>
 {% endblock %}
