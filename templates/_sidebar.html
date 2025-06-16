@@ -25,11 +25,9 @@
             >🧺​ Complementos</a
           >
         </li>
-
         <li class="nav-item">
-          <a class="nav-link" href="/admin/platillos">🥗​🍝​​ Platillos</a>
+          <a class="nav-link" href="{{ url_for('platillos_populares') }}">🥗​​​Platillos Populares🍝</a>
         </li>
-
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('salones_public') }}"
             >🏛️ Salones</a
@@ -66,6 +64,9 @@
           <a class="nav-link" href="{{ url_for('banquetes_public') }}"
             >📦 banquetes</a
           >
+        </li>        
+        <li class="nav-item">
+          <a class="nav-link" href="/admin/platillos">🥗​🍝​​ Platillos</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('admin_proyectos') }}"
@@ -78,7 +79,7 @@
           >
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/admin/gerente_salon">🧑‍💼 Gerente Salón</a>
+          <a class="nav-link" href="{{ url_for('gerente_salon')}}">🧑‍💼 Gerente Salón</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{{ url_for('ver_solicitudes') }}">

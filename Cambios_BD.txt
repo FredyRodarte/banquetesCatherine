@@ -96,7 +96,9 @@ CREATE TABLE solicitud_reservacion (
     revisado          NUMBER DEFAULT 0        -- 0 = pendiente, 1 = revisado
 );
 
-
-
---------------------Para paquetes-----------------------
-ALTER TABLE PAQUETE ADD PRECIO NUMBER(10, 2);
+=======
+--------------------PARA COTIZACIONES---------------------------------------------------
+ALTER TABLE salon ADD precio NUMBER(10, 2);
+ALTER TABLE platillo ADD precio NUMBER(10, 2);
+ALTER TABLE complemento ADD precio NUMBER(10, 2);
+>>>>>>> 4fc201181b3d36b1af2a668d1febf1866b7cac48

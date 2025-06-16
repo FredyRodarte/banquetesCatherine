@@ -21,7 +21,11 @@
                 <tbody>
                     {% for s in solicitudes %}
                     <tr>
-                        <td>{{ s.nombre }} {{ s.apaterno }} {{ s.amaterno }}</td>
+                        <td>
+                            <a href="{{ url_for('ver_detalle_solicitud', id=s.id) }}">
+                                {{ s.nombre }} {{ s.apaterno }} {{ s.amaterno }}
+                            </a>
+                        </td>
                         <td>{{ s.calle }} #{{ s.numero }}, {{ s.localidad }}, {{ s.municipio }}, {{ s.estado }}</td>
                         <td>{{ s.tipo_paquete|capitalize }}</td>
                         <td>{{ s.tipo_anticipo|capitalize }}</td>
@@ -35,8 +39,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            <form action="{{ url_for('aprobar_solicitud', id=s.id) }}" method="POST" class="d-inline">
-                                <button class="btn btn-success btn-sm">Aprobar</button>
+                            <a href="{{ url_for('form_aprobar_solicitud', id=s.id) }}" class="btn btn-success btn-sm">Aprobar</a>
                             </form>
                             <form action="{{ url_for('rechazar_solicitud', id=s.id) }}" method="POST" class="d-inline" 
                                   onsubmit="return confirm('¿Seguro que quieres rechazar esta solicitud?');">

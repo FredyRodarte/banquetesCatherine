@@ -4,8 +4,10 @@ from xhtml2pdf import pisa
 from io import BytesIO
 import cx_Oracle
 import re
+from flask import render_template
 import os
 from werkzeug.utils import secure_filename
+
 import pandas as pd
 
 dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xe") 
@@ -42,8 +44,8 @@ def admin_proyectos():
             p.COMENSALES,
             s.NOMBRE_SALON AS NOMBRE_SALON,
             g.NOMBRE || ' ' || g.APATERNO || ' ' || g.AMATERNO AS NOMBRE_GERENTE,
-            p.RFC,
-            p.CURP,
+            p.RFC_GERENTE,
+            p.CURP_GERENTE,
             u.NOMBRE || ' ' || u.APATERNO || ' ' || u.AMATERNO AS NOMBRE_USUARIO,
             p.RFC_USUARIO,
             p.CURP_USUARIO,
@@ -97,7 +99,7 @@ def admin_proyectos():
         conexion.close()
         return render_template('/administrador/proyectos.html', proyectos=proyectos)
     except Exception as e:
-        print("Error al cargar proyectos", e)
+        print("Error al cargar proyectos")
         return render_template('index.html')
 
 @app.route('/admin/nuevo_proyecto')
@@ -267,8 +269,6 @@ def registrar_proyecto():
     except Exception as e:
         print("❌ ERROR al registrar proyecto:", e)
         flash("⚠️ El proyecto no se pudo registrar. Verifica los datos ingresados")
-
-
 @app.route('/admin/complementos')
 def admin_complementos():
     try:
@@ -1182,60 +1182,60 @@ def actualizar_platillo(id):
     pass
 
 
-# @app.route('/admin/platillos/populares')
-# def platillos_populares():
-#     try:
-#         conexion = get_db_connection()
-#         cursor = conexion.cursor()
+@app.route('/admin/platillos/populares')
+def platillos_populares():
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
         
-#         # Consulta para platillos más populares
-#         cursor.execute("""
-#             SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
-#             FROM PLATILLO p
-#             LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
-#             LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
-#             LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
-#             GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
-#             ORDER BY total DESC
-#         """)
+        # Consulta para platillos más populares
+        cursor.execute("""
+            SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
+            FROM PLATILLO p
+            LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
+            LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
+            LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
+            GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
+            ORDER BY total DESC
+        """)
         
-#         populares = []
-#         for row in cursor:
-#             populares.append({
-#                 'id': row[0],
-#                 'nombre': row[1],
-#                 'total': row[2]
-#             })
+        populares = []
+        for row in cursor:
+            populares.append({
+                'id': row[0],
+                'nombre': row[1],
+                'total': row[2]
+            })
         
-#         # Consulta para platillos menos populares
-#         cursor.execute("""
-#             SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
-#             FROM PLATILLO p
-#             LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
-#             LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
-#             LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
-#             GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
-#             ORDER BY total ASC
-#         """)
+        # Consulta para platillos menos populares
+        cursor.execute("""
+            SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
+            FROM PLATILLO p
+            LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
+            LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
+            LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
+            GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
+            ORDER BY total ASC
+        """)
         
-#         menos_populares = []
-#         for row in cursor:
-#             menos_populares.append({
-#                 'id': row[0],
-#                 'nombre': row[1],
-#                 'total': row[2]
-#             })
+        menos_populares = []
+        for row in cursor:
+            menos_populares.append({
+                'id': row[0],
+                'nombre': row[1],
+                'total': row[2]
+            })
         
-#         return render_template('administrador/enlistar_platillos.html',
-#                              populares=populares,
-#                              menos_populares=menos_populares)
+        return render_template('administrador/enlistar_platillos.html',
+                             populares=populares,
+                             menos_populares=menos_populares)
         
-#     except cx_Oracle.Error as error:
-#         flash(f'Error al cargar platillos populares: {error}', 'danger')
-#         return redirect(url_for('platillos'))
-#     finally:
-#         cursor.close()
-#         conexion.close()
+    except cx_Oracle.Error as error:
+        flash(f'Error al cargar platillos populares: {error}', 'danger')
+        return redirect(url_for('platillos'))
+    finally:
+        cursor.close()
+        conexion.close()
 
 # --- Rutas para Instrucciones 
 @app.route('/admin/platillos/<int:id>/instrucciones')
@@ -1275,56 +1275,20 @@ def admin_paquetes():
         conexion = get_db_connection()
         cursor = conexion.cursor()
 
-        # Consulta para platillos normales
-        query_platillos = "SELECT NOMBRE_PLATILLO FROM BANQUETES.PLATILLO ORDER BY NOMBRE_PLATILLO"
+        query_platillos = "SELECT NOMBRE_PLATILLO FROM platillo ORDER BY NOMBRE_PLATILLO"
         cursor.execute(query_platillos)
         platillos_rows = cursor.fetchall()
         platillos = [{'nombre_platillo': r[0]} for r in platillos_rows]
 
-        # Consulta para platillos populares (IDs 1, 2, 3)
-        cursor.execute("""
-            SELECT ID_PLATILLO, NOMBRE_PLATILLO 
-            FROM BANQUETES.PLATILLO 
-            WHERE ID_PLATILLO IN (1, 2, 3)
-            ORDER BY ID_PLATILLO
-        """)
-        populares_rows = cursor.fetchall()
-        populares = [
-            {'id': row[0], 'nombre': row[1], 'popularidad': '⭐️⭐️⭐️⭐️⭐️' if row[0] == 1 else 
-                         '⭐️⭐️⭐️⭐️' if row[0] == 2 else '⭐️⭐️⭐️'}
-            for row in populares_rows
-        ]
-
-        # Consulta para platillos menos populares (últimos 3)
-        cursor.execute("""
-            SELECT ID_PLATILLO, NOMBRE_PLATILLO 
-            FROM (
-                SELECT ID_PLATILLO, NOMBRE_PLATILLO 
-                FROM BANQUETES.PLATILLO 
-                ORDER BY ID_PLATILLO DESC
-            ) 
-            WHERE ROWNUM <= 3
-            ORDER BY ID_PLATILLO
-        """)
-        menos_populares_rows = cursor.fetchall()
-        menos_populares = [
-            {'id': row[0], 'nombre': row[1], 'popularidad': '⭐️'}
-            for row in menos_populares_rows
-        ]
-
-        # Resto de consultas (complementos y salones)
-        query_complementos = "SELECT NOMBRE_COMPLEMENTO FROM BANQUETES.COMPLEMENTO ORDER BY NOMBRE_COMPLEMENTO"
+        query_complementos = "SELECT NOMBRE_COMPLEMENTO FROM complemento ORDER BY NOMBRE_COMPLEMENTO"
         cursor.execute(query_complementos)
         complementos_rows = cursor.fetchall()
         complementos = [{'nombre_complemento': r[0]} for r in complementos_rows]
 
-        query_salones = "SELECT NOMBRE_SALON, CAPACIDAD FROM BANQUETES.SALON ORDER BY NOMBRE_SALON"
+        query_salones = "SELECT NOMBRE_SALON, CAPACIDAD FROM salon ORDER BY NOMBRE_SALON"
         cursor.execute(query_salones)
         salones_rows = cursor.fetchall()
         salones = [{'nombre_salon': r[0], 'capacidad': r[1]} for r in salones_rows]
-
-        # Lista manual de precios para cada paquete (ajusta los valores según los que tengas)
-        precios = [4500, 2800, 3200, 3800, 4100]  # Puedes poner los que gustes según la cantidad de paquetes
 
         cursor.close()
         conexion.close()
@@ -1335,12 +1299,7 @@ def admin_paquetes():
                                salones=salones)
     except Exception as e:
         print("Error al cargar datos de paquetes:", e)
-        flash(f"Error al cargar datos de paquetes: {e}", "danger")
-        return redirect(url_for('index'))
-
-
-
-
+        return f"Error al cargar datos de paquetes: {e}"
 
 
 
@@ -1660,34 +1619,12 @@ def ver_solicitudes():
     return render_template("gerente/solicitudes.html", solicitudes=solicitudes)
 
 
-@app.route('/gerente/solicitud/form_aprobar/<int:id>')
-def form_aprobar_solicitud(id):
-    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
-        return redirect(url_for('login'))
-
-    cursor.execute("SELECT * FROM solicitud_reservacion WHERE id_solicitud = :1", [id])
-    row = cursor.fetchone()
-
-    if not row:
-        flash("Solicitud no encontrada.", "danger")
-        return redirect(url_for('ver_solicitudes'))
-
-    campos = ['id_solicitud', 'rfc', 'curp', 'apaterno', 'amaterno', 'nombre',
-              'calle', 'numero', 'localidad', 'municipio', 'estado', 'c_postal',
-              'tipo_paquete', 'tipo_anticipo', 'comprobante']
-    solicitud = dict(zip(campos, row))
-
-    return render_template("gerente/asignar_password.html", solicitud=solicitud)
-
-
 
 @app.route('/gerente/solicitud/aprobar/<int:id>', methods=['POST'])
 def aprobar_solicitud(id):
     if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
         return redirect(url_for('login'))
 
-    password = request.form['pass'] 
-    
     cursor.execute("SELECT * FROM solicitud_reservacion WHERE id_solicitud = :1", [id])
     row = cursor.fetchone()
 
@@ -1714,8 +1651,6 @@ def aprobar_solicitud(id):
         conn.commit()
         flash("Cliente creado correctamente.", "success")
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return f"Error al aprobar solicitud: {e}", 500
 
     return redirect(url_for('ver_solicitudes'))
@@ -1731,11 +1666,6 @@ def rechazar_solicitud(id):
     flash("Solicitud rechazada.", "info")
     return redirect(url_for('ver_solicitudes'))
 
-
-
-#=======================================================
-# Detalles de la solicitud
-#========================================================
 @app.route('/gerente/solicitud/<int:id>')
 def ver_detalle_solicitud(id):
     if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
@@ -1754,10 +1684,6 @@ def ver_detalle_solicitud(id):
     solicitud = dict(zip(campos, row))
 
     return render_template("gerente/detalle_solicitud.html", solicitud=solicitud)
-
-
-
-
 
 
 
@@ -1824,8 +1750,8 @@ def cotizar():
                 'id_complemento': int(id_complemento),
                 'comensales': int(request.form['comensales']),
                 'precio_salon': precio_salon,
-                'precio_platillo': precio_platillo_total,
-                'precio_complemento': precio_complemento_total
+                'precio_platillo': precio_platillo * int(request.form['comensales']),
+                'precio_complemento': precio_complemento * int(request.form['comensales'])
             }
         )
 
@@ -2023,6 +1949,14 @@ def eliminar_gerente(id_gerente):
         print("Error al eliminar gerente:", e)
         flash('Error al eliminar gerente', 'danger')
     return redirect(url_for('gerente_salon'))
+
+
+
+
+
+
+
+
 
 
 

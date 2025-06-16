@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %} Editar Ingrediente {% endblock %}
+
+{% block content %}
+<div class="container mt-4 fondo-blanco">
+    <h2 class="mb-4">Editar Ingrediente</h2>
+
+    <form method="POST" action="{{ url_for('actualizar_ingrediente', id=ingrediente.id) }}" class="needs-validation" novalidate>
+        <div class="row mb-3">
+            <label for="nombre" class="col-sm-2 col-form-label">Nombre:</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="nombre" name="nombre" value="{{ ingrediente.nombre }}" required>
+                <div class="invalid-feedback">Por favor ingrese el nombre del ingrediente.</div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="unidad" class="col-sm-2 col-form-label">Unidad de Medida:</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="unidad" name="unidad" value="{{ ingrediente.unidad }}" required>
+                <div class="invalid-feedback">Ingrese una unidad de medida válida.</div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="presentacion" class="col-sm-2 col-form-label">Presentación:</label>
+            <div class="col-sm-10">
+                <input type="text" class="form-control" id="presentacion" name="presentacion" value="{{ ingrediente.presentacion }}" required>
+                <div class="invalid-feedback">Ingrese una presentación válida.</div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="descripcion" class="col-sm-2 col-form-label">Descripción:</label>
+            <div class="col-sm-10">
+                <textarea class="form-control" id="descripcion" name="descripcion" required>{{ ingrediente.descripcion }}</textarea>
+                <div class="invalid-feedback">Ingrese una descripción.</div>
+            </div>
+        </div>
+
+        <div class="row mb-3">
+            <label for="precio" class="col-sm-2 col-form-label">Precio:</label>
+            <div class="col-sm-10">
+                <input type="number" class="form-control" id="precio" name="precio" step="0.01" value="{{ ingrediente.precio }}" required>
+                <div class="invalid-feedback">Ingrese un precio válido.</div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <a href="{{ url_for('lista_ingredientes') }}" class="btn btn-secondary me-2">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
