@@ -1983,25 +1983,72 @@ def logout():
 
 
 
-
+#========================================================
+# Cobranzas
+#========================================================
 
 #========================================================
-# Ruta para eliminar un gerente
+# Cobranzas
 #========================================================
-@app.route('/admin/eliminar_gerente/<id_gerente>', methods=['POST'])
-def eliminar_gerente(id_gerente):
+@app.route('/admin/cobranzas')
+def admin_cobranzas():
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
-        cursor.execute("DELETE FROM GERENTE_SALON WHERE ID_GERENTE = :1", (id_gerente,))
-        conexion.commit()
+
+        query = """
+            SELECT p.id_proyecto, p.fecha_evento, p.anticipo, 
+                   u.nombre, u.apaterno, u.amaterno
+            FROM proyecto p
+            JOIN usuario u ON p.id_usuario = u.id_usuario
+            ORDER BY p.id_proyecto
+        """
+        cursor.execute(query)
+        rows = cursor.fetchall()
+
+        cobranzas = []
+        hoy = datetime.today().date()  # fecha actual sin tiempo
+        tres_semanas = timedelta(days=21)
+
+        for r in rows:
+            fecha_evento = r[1]
+            if isinstance(fecha_evento, datetime):
+                fecha_evento_date = fecha_evento.date()
+                fecha_evento_str = fecha_evento_date.strftime('%Y-%m-%d')
+            else:
+                fecha_evento_date = fecha_evento
+                fecha_evento_str = str(fecha_evento)
+
+            # Estatus según fecha del evento
+            if fecha_evento_date < hoy:
+                estatus = "Pagado"
+            else:
+                estatus = "Pendiente"
+
+            # Notificación para eventos en menos de 3 semanas
+            dias_restantes = fecha_evento_date - hoy
+            notificacion = ""
+            if timedelta(0) <= dias_restantes <= tres_semanas:
+                notificacion = f"¡Evento en {dias_restantes.days} días!"
+
+            cobranzas.append({
+                'id_proyecto': r[0],
+                'fecha_evento': fecha_evento_str,
+                'anticipo': r[2],
+                'nombre': r[3],
+                'apaterno': r[4],
+                'amaterno': r[5],
+                'estatus': estatus,
+                'notificacion': notificacion
+            })
+
         cursor.close()
         conexion.close()
-        flash('Gerente eliminado correctamente', 'success')
+
+        return render_template('administrador/cobranzas.html', cobranzas=cobranzas)
     except Exception as e:
-        print("Error al eliminar gerente:", e)
-        flash('Error al eliminar gerente', 'danger')
-    return redirect(url_for('gerente_salon'))
+        print("Error al cargar cobranzas:", e)
+        return f"Error al cargar cobranzas: {e}"
 
 
 

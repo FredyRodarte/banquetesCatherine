@@ -41,6 +41,11 @@
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('admin_paquetes') }}" >📦 Paquetes</a>
         </li>
+
+        <li class="nav-item">
+          <a class="nav-link" href="{{ url_for('admin_cobranzas') }}">💰 Cobranzas</a>
+        </li>
+
         {% endif %} {% if session.get('rol') == 'cliente' %}
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('vista_cliente') }}"
@@ -93,6 +98,7 @@
             >📋 Ingredientes</a
           >
         </li>
+      
         {% endif %}
       </ul>
 
