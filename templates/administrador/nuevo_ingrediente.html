@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Agregar Ingrediente{% endblock %}
+
+{% block content %}
+<div class="container mt-4 fondo-blanco">
+    <h2 class="mb-4">Agregar Nuevo Ingrediente</h2>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% if mensajes %}
+            {% for categoria, mensaje in mensajes %}
+                <div class="alert alert-{{ categoria }} alert-dismissible fade show" role="alert">
+                    {{ mensaje }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('nuevo_ingrediente') }}" class="needs-validation" novalidate>
+        <div class="mb-3">
+            <label for="nombre" class="form-label">Nombre del ingrediente</label>
+            <input type="text" class="form-control" id="nombre" name="nombre" required>
+            <div class="invalid-feedback">Por favor, ingresa un nombre.</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="unidad" class="form-label">Unidad de medida</label>
+            <input type="text" class="form-control" id="unidad" name="unidad" required>
+            <div class="invalid-feedback">Por favor, indica la unidad de medida.</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="presentacion" class="form-label">Presentación</label>
+            <input type="text" class="form-control" id="presentacion" name="presentacion" required>
+            <div class="invalid-feedback">Indica la presentación.</div>
+        </div>
+
+        <div class="mb-3">
+            <label for="descripcion" class="form-label">Descripción</label>
+            <textarea class="form-control" id="descripcion" name="descripcion" rows="3" required></textarea>
+            <div class="invalid-feedback">Incluye una breve descripción.</div>
+        </div>
+
+        <div class="d-flex justify-content-end">
+            <a href="{{ url_for('lista_ingredientes') }}" class="btn btn-secondary me-2">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Guardar Ingrediente</button>
+        </div>
+    </form>
+</div>
+{% endblock %}

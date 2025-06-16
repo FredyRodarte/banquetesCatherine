@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Ingredientes por Evento{% endblock %}
+
+{% block content %}
+<div class="container mt-4 fondo-blanco">
+    <h2 class="mb-4">Ingredientes del Evento #{{ id_proyecto }}</h2>
+
+    {% if ingredientes %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>Unidad</th>
+                    <th>Cantidad Requerida</th>
+                    <th>Platillo</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ing in ingredientes %}
+                <tr>
+                    <td>{{ ing.nombre }}</td>
+                    <td>{{ ing.unidad }}</td>
+                    <td>{{ ing.cantidad }}</td>
+                    <td>{{ ing.platillo }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+        <div class="alert alert-warning">Este evento no tiene ingredientes registrados.</div>
+    {% endif %}
+
+    <a href="{{ url_for('admin_proyectos') }}" class="btn btn-secondary mt-3">
+        ← Volver a Proyectos
+    </a>
+</div>
+{% endblock %}

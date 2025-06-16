@@ -1,11 +1,14 @@
-from flask import Flask, render_template, session, request, redirect, url_for, flash
+from flask import Flask, render_template, session, request, redirect, url_for, flash, make_response, send_file
 from datetime import datetime, timedelta
+from xhtml2pdf import pisa
+from io import BytesIO
 import cx_Oracle
 import re
 from flask import render_template
 import os
 from werkzeug.utils import secure_filename
 
+import pandas as pd
 
 dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xe") 
 conn = cx_Oracle.connect(user="banquetes", password="banquetes", dsn=dsn)
@@ -703,6 +706,10 @@ def nuevo_ingrediente():
                 float(request.form['precio'])
             )
             cursor.execute("""
+                if not all(request.form.values()):
+                    flash("Todos los campos son obligatorios.", "warning")
+                    return redirect(url_for('nuevo_ingrediente'))
+
                 INSERT INTO ingrediente (
                     id_ingrediente, nombre_ingrediente, unidad_medida,
                     presentacion, descripcion, precio
@@ -781,6 +788,175 @@ def eliminar_ingrediente(id):
         print(f"Error al eliminar ingrediente: {e}")
         flash("No se pudo eliminar el ingrediente.", "danger")
     return redirect(url_for('lista_ingredientes'))
+
+@app.route('/admin/reportes/ingredientes', methods=['GET', 'POST'])
+def reporte_ingredientes():
+    ingredientes = []
+    fecha_inicio = fecha_fin = None
+
+    if request.method == 'POST':
+        fecha_inicio = request.form['fecha_inicio']
+        fecha_fin = request.form['fecha_fin']
+
+        try:
+            query = """
+                SELECT 
+                    i.nombre_ingrediente,
+                    i.unidad_medida,
+                    SUM(pi.cantidad * pr.comensales) AS total_requerido,
+                    LISTAGG(pr.id_proyecto, ', ') WITHIN GROUP (ORDER BY pr.id_proyecto) AS eventos
+                FROM proyecto pr
+                JOIN paquete paq ON pr.id_paquete = paq.id_paquete
+                JOIN platillo pla ON paq.id_platillo = pla.id_platillo
+                JOIN platillo_ingrediente pi ON pla.id_platillo = pi.id_platillo
+                JOIN ingrediente i ON pi.id_ingrediente = i.id_ingrediente
+                WHERE pr.fecha_evento BETWEEN TO_DATE(:1, 'YYYY-MM-DD') AND TO_DATE(:2, 'YYYY-MM-DD')
+                AND pr.estatus_evento = 1
+                GROUP BY i.nombre_ingrediente, i.unidad_medida
+                ORDER BY i.nombre_ingrediente
+            """
+            cursor.execute(query, [fecha_inicio, fecha_fin])
+            rows = cursor.fetchall()
+            for row in rows:
+                ingredientes.append({
+                    'nombre': row[0],
+                    'unidad': row[1],
+                    'cantidad': row[2],
+                    'eventos': row[3]
+                })
+        except Exception as e:
+            print(f"Error al consultar reporte: {e}")
+            flash("Error al generar el reporte", "danger")
+
+    return render_template('administrador/reporte_ingredientes.html', ingredientes=ingredientes, fecha_inicio=fecha_inicio, fecha_fin=fecha_fin)
+
+@app.route('/admin/reportes/ingredientes/pdf')
+def exportar_pdf():
+    inicio = request.args.get('inicio')
+    fin = request.args.get('fin')
+    ingredientes = []
+
+    try:
+        cursor.execute("""
+            SELECT 
+                i.nombre_ingrediente,
+                i.unidad_medida,
+                SUM(pi.cantidad * pr.comensales) AS total_requerido,
+                LISTAGG(pr.id_proyecto, ', ') WITHIN GROUP (ORDER BY pr.id_proyecto) AS eventos
+            FROM proyecto pr
+            JOIN paquete paq ON pr.id_paquete = paq.id_paquete
+            JOIN platillo pla ON paq.id_platillo = pla.id_platillo
+            JOIN platillo_ingrediente pi ON pla.id_platillo = pi.id_platillo
+            JOIN ingrediente i ON pi.id_ingrediente = i.id_ingrediente
+            WHERE pr.fecha_evento BETWEEN TO_DATE(:1, 'YYYY-MM-DD') AND TO_DATE(:2, 'YYYY-MM-DD')
+              AND pr.estatus_evento = 1
+            GROUP BY i.nombre_ingrediente, i.unidad_medida
+            ORDER BY i.nombre_ingrediente
+        """, [inicio, fin])
+
+        rows = cursor.fetchall()
+        for row in rows:
+            ingredientes.append({
+                'nombre': row[0],
+                'unidad': row[1],
+                'cantidad': row[2],
+                'eventos': row[3]
+            })
+
+            # Generar PDF
+        html = render_template('administrador/pdf_ingredientes.html', ingredientes=ingredientes, fecha_inicio=inicio, fecha_fin=fin)
+        
+        result = BytesIO()
+        pisa.CreatePDF(BytesIO(html.encode("utf-8")), dest=result)
+
+        response = make_response(result.getvalue())
+        response.headers["Content-Type"] = "application/pdf"
+        response.headers["Content-Disposition"] = "inline; filename=ingredientes.pdf"
+        return response
+    
+    except Exception as e:
+        print(f"❌ Error generando PDF: {e}")
+        flash("No se pudo generar el PDF.", "danger")
+        return redirect(url_for('reporte_ingredientes'))
+
+@app.route('/admin/reportes/ingredientes/excel')
+def exportar_excel():
+    inicio = request.args.get('inicio')
+    fin = request.args.get('fin')
+
+    ingredientes = []
+
+    try:
+        cursor.execute("""
+            SELECT 
+                i.nombre_ingrediente,
+                i.unidad_medida,
+                SUM(pi.cantidad * pr.comensales) AS total_requerido,
+                LISTAGG(pr.id_proyecto, ', ') WITHIN GROUP (ORDER BY pr.id_proyecto) AS eventos
+            FROM proyecto pr
+            JOIN paquete paq ON pr.id_paquete = paq.id_paquete
+            JOIN platillo pla ON paq.id_platillo = pla.id_platillo
+            JOIN platillo_ingrediente pi ON pla.id_platillo = pi.id_platillo
+            JOIN ingrediente i ON pi.id_ingrediente = i.id_ingrediente
+            WHERE pr.fecha_evento BETWEEN TO_DATE(:1, 'YYYY-MM-DD') AND TO_DATE(:2, 'YYYY-MM-DD')
+              AND pr.estatus_evento = 1
+            GROUP BY i.nombre_ingrediente, i.unidad_medida
+            ORDER BY i.nombre_ingrediente
+        """, [inicio, fin])
+
+        rows = cursor.fetchall()
+        for row in rows:
+            ingredientes.append({
+                'nombre': row[0],
+                'unidad': row[1],
+                'cantidad': row[2],
+                'eventos': row[3]
+            })
+
+        # Exportar a Excel
+        df = pd.DataFrame(ingredientes)
+        output = BytesIO()
+        with pd.ExcelWriter(output, engine='openpyxl') as writer:
+            df.to_excel(writer, index=False, sheet_name='Reporte')
+        output.seek(0)
+
+        return send_file(output, download_name='ingredientes.xlsx', as_attachment=True)
+
+    except Exception as e:
+            print("Error exportando a Excel:", e)
+            flash("No se pudo exportar el reporte.", "danger")
+            return redirect(url_for('reporte_ingredientes'))
+
+@app.route('/admin/proyecto/<int:id>/ingredientes')
+def ingredientes_evento(id):
+    try:
+        cursor.execute("""
+            SELECT 
+                i.nombre_ingrediente,
+                i.unidad_medida,
+                pi.cantidad * p.comensales AS cantidad_total,
+                pla.nombre_platillo
+            FROM proyecto p
+            JOIN paquete paq ON p.id_paquete = paq.id_paquete
+            JOIN platillo pla ON paq.id_platillo = pla.id_platillo
+            JOIN platillo_ingrediente pi ON pla.id_platillo = pi.id_platillo
+            JOIN ingrediente i ON pi.id_ingrediente = i.id_ingrediente
+            WHERE p.id_proyecto = :1
+        """, [id])
+        rows = cursor.fetchall()
+        ingredientes = []
+        for row in rows:
+            ingredientes.append({
+                'nombre': row[0],
+                'unidad': row[1],
+                'cantidad': row[2],
+                'platillo': row[3]
+            })
+        return render_template('administrador/ingredientes_evento.html', ingredientes=ingredientes, id_proyecto=id)
+    except Exception as e:
+        print("Error al obtener ingredientes del evento:", e)
+        flash("No se pudo cargar el detalle del evento.", "danger")
+        return redirect(url_for('admin_proyectos'))
 
 
 #=======================================================
@@ -1511,6 +1687,24 @@ def rechazar_solicitud(id):
     flash("Solicitud rechazada.", "info")
     return redirect(url_for('ver_solicitudes'))
 
+@app.route('/gerente/solicitud/<int:id>')
+def ver_detalle_solicitud(id):
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("SELECT * FROM solicitud_reservacion WHERE id_solicitud = :1", [id])
+    row = cursor.fetchone()
+
+    if not row:
+        flash("Solicitud no encontrada.", "danger")
+        return redirect(url_for('ver_solicitudes'))
+
+    campos = ['id_solicitud', 'rfc', 'curp', 'apaterno', 'amaterno', 'nombre',
+              'calle', 'numero', 'localidad', 'municipio', 'estado', 'c_postal',
+              'tipo_paquete', 'tipo_anticipo', 'comprobante']
+    solicitud = dict(zip(campos, row))
+
+    return render_template("gerente/detalle_solicitud.html", solicitud=solicitud)
 
 
 

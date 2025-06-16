@@ -95,3 +95,5 @@ CREATE TABLE solicitud_reservacion (
     tipo_paquete      VARCHAR2(20) NOT NULL,  -- evento o salon
     revisado          NUMBER DEFAULT 0        -- 0 = pendiente, 1 = revisado
 );
+
+
