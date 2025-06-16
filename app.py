@@ -1,5 +1,5 @@
 from flask import Flask, render_template, session, request, redirect, url_for, flash, make_response, send_file
-from datetime import datetime
+from datetime import datetime, timedelta
 from xhtml2pdf import pisa
 from io import BytesIO
 import cx_Oracle
@@ -53,10 +53,10 @@ def admin_proyectos():
             TO_CHAR(p.FECHA_EVENTO, 'DD/MM/YYYY') AS FECHA_EVENTO_FORM,
             p.ANTICIPO,
             CASE p.ESTATUS_EVENTO 
-                WHEN 1 THEN 'Pendiente'
-                WHEN 2 THEN 'Confirmado'
-                WHEN 3 THEN 'Cancelado'
-                WHEN 4 THEN 'Completado'
+                WHEN 0 THEN 'Pendiente'
+                WHEN 1 THEN 'Activo'
+                WHEN 2 THEN 'Cancelado'
+                WHEN 3 THEN 'Completado'
                 ELSE 'Desconocido'
             END AS ESTATUS_EVENTO
         FROM 
@@ -104,8 +104,171 @@ def admin_proyectos():
 
 @app.route('/admin/nuevo_proyecto')
 def nuevo_proyecto():
-    return render_template('/administrador/nuevo_proyecto.html')
+    try:
+        #crear conexion a la bd
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
 
+        querySalon = '''
+        SELECT
+            ID_SALON,
+            NOMBRE_SALON
+        FROM
+            SALON
+        '''
+
+        queryGerente = '''
+        SELECT
+            ID_GERENTE,
+            NOMBRE || ' ' || APATERNO || ' ' || AMATERNO as NOMBRE_GERENTE
+        FROM
+            GERENTE_EVENTO
+        '''
+
+        queryUsuario = '''
+        SELECT
+            ID_USUARIO,
+            NOMBRE || ' ' || APATERNO || ' ' || AMATERNO as NOMBRE_USUARIO
+        FROM
+            USUARIO
+        '''
+
+        queryPaquete = '''
+        SELECT
+            ID_PAQUETE,
+            NOMBRE_PAQUETE
+        FROM
+            PAQUETE
+        '''
+
+        cursor1.execute(querySalon)
+        rows = cursor1.fetchall()
+        salones = []
+
+        for row in rows:
+            salones.append({
+                'id_salon': row[0],
+                'nombre_salon': row[1]
+            })
+
+        cursor1.execute(queryGerente)
+        rows = cursor1.fetchall()
+        gerentes = []
+
+        for row in rows:
+            gerentes.append({
+                'id_gerente': row[0],
+                'nombre_gerente': row[1]
+            })
+
+        cursor1.execute(queryUsuario)
+        rows = cursor1.fetchall()
+        usuarios = []
+
+        for row in rows:
+            usuarios.append({
+                'id_usuario': row[0],
+                'nombre_usuario': row[1]
+            })
+        
+        cursor1.execute(queryPaquete)
+        rows = cursor1.fetchall()
+        paquetes = []
+
+        for row in rows:
+            paquetes.append({
+                'id_paquete': row[0],
+                'nombre_paquete': row[1]
+            })
+
+        #cerrar conexion 
+        cursor1.close()
+        conexion.close()
+        
+        #print("salones: ", salones)
+        #print("Gerentes:", gerentes)
+        #print("usuarios:", usuarios)
+        #print("paquete:", paquetes)
+        
+        return render_template('/administrador/nuevo_proyecto.html', salones=salones, gerentes=gerentes, usuarios=usuarios, paquetes=paquetes)
+    except Exception as e:
+        print("Error al hacer las consultas en las respectivas tablas")
+
+@app.route('/admin/registrar_proyecto', methods=['POST'])
+def registrar_proyecto():
+    try:
+        #Recuperar los datos del formulario:
+        comensales = request.form['comensalesA']
+        id_salon = request.form['salonA']
+        id_gerente = request.form['gerenteA']
+        rfc_gerente = ''
+        curp_gerente = ''
+        id_usuario = request.form['usuarioA']
+        rfc_usuario = ''
+        curp_usuario = ''
+        id_paquete = request.form['paqueteA']
+        fecha = request.form['fechaA']
+        anticipo = request.form['anticipoA']
+        estatus = request.form['estatusA']
+
+        #Formatear la fecha para no tener problemas con la BD
+        fecha_oracle = datetime.strptime(fecha, '%Y-%m-%d').strftime('%d-%b-%y').upper()
+
+        #crear conexion a la bd
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
+        queryGerente = '''
+        SELECT
+            RFC,
+            CURP
+        FROM
+            GERENTE_EVENTO
+        WHERE ID_GERENTE = :id_gerente
+        '''
+
+        queryUsuario = '''
+        SELECT
+            RFC,
+            CURP
+        FROM
+            USUARIO
+        WHERE ID_USUARIO = :id_usuario
+        '''
+        cursor1.execute(queryGerente,{'id_gerente': id_gerente})
+        datos_gerente = cursor1.fetchone()
+
+        if datos_gerente:
+            rfc_gerente, curp_gerente = datos_gerente
+        else:
+            rfc_gerente, curp_gerente = '', ''
+
+        cursor1.execute(queryUsuario,{'id_usuario': id_usuario})
+        datos_usuario = cursor1.fetchone()
+
+        if datos_usuario:
+            rfc_usuario, curp_usuario = datos_usuario
+        else:
+            rfc_usuario, curp_usuario = '', ''
+
+        queryProyecto = '''
+        INSERT INTO PROYECTO (ID_PROYECTO,COMENSALES, ID_SALON, ID_GERENTE, RFC_GERENTE, CURP_GERENTE,
+            ID_USUARIO, RFC_USUARIO, CURP_USUARIO, ID_PAQUETE, FECHA_EVENTO, ANTICIPO, ESTATUS_EVENTO)
+            VALUES (SQ_PROYECTO.NEXTVAL, :1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)
+        '''
+        cursor1.execute(queryProyecto, [comensales, id_salon, id_gerente, rfc_gerente, curp_gerente,
+                                        id_usuario, rfc_usuario, curp_usuario, id_paquete, fecha_oracle, anticipo, estatus])
+        conexion.commit()
+
+        #cerrar conexion 
+        cursor1.close()
+        conexion.close()
+
+        flash("✅ El proyecto fue registrado exitosamente.", "success")
+        return redirect(url_for('admin_proyectos'))
+    except Exception as e:
+        print("❌ ERROR al registrar proyecto:", e)
+        flash("⚠️ El proyecto no se pudo registrar. Verifica los datos ingresados")
 @app.route('/admin/complementos')
 def admin_complementos():
     try:
@@ -1522,6 +1685,24 @@ def rechazar_solicitud(id):
     flash("Solicitud rechazada.", "info")
     return redirect(url_for('ver_solicitudes'))
 
+@app.route('/gerente/solicitud/<int:id>')
+def ver_detalle_solicitud(id):
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("SELECT * FROM solicitud_reservacion WHERE id_solicitud = :1", [id])
+    row = cursor.fetchone()
+
+    if not row:
+        flash("Solicitud no encontrada.", "danger")
+        return redirect(url_for('ver_solicitudes'))
+
+    campos = ['id_solicitud', 'rfc', 'curp', 'apaterno', 'amaterno', 'nombre',
+              'calle', 'numero', 'localidad', 'municipio', 'estado', 'c_postal',
+              'tipo_paquete', 'tipo_anticipo', 'comprobante']
+    solicitud = dict(zip(campos, row))
+
+    return render_template("gerente/detalle_solicitud.html", solicitud=solicitud)
 
 
 
@@ -1619,7 +1800,10 @@ def login():
 
     return render_template('login.html')
 
-###########Vista cliente
+
+#========================================================
+# Ruta Vista cliente
+#========================================================
 
 @app.route('/cliente/proyectos')
 def vista_cliente():
@@ -1653,6 +1837,74 @@ def vista_cliente():
         print("Error cliente:", e)
         return "Error cargando proyectos"
     
+#========================================================
+# Ruta para añadir comensales
+#========================================================
+
+@app.route('/cliente/actualizar_comensales', methods=['POST'])
+def actualizar_comensales():
+    if 'usuario_id' not in session or session.get('rol') != 'cliente':
+        return redirect(url_for('login'))
+
+    proyecto_id = request.form.get('proyecto_id')
+    nuevos_comensales = request.form.get('comensales')
+    
+    try:
+        if not proyecto_id or not nuevos_comensales:
+            flash('ID del proyecto y número de comensales son requeridos.', 'error')
+            return redirect(url_for('vista_cliente'))
+        
+        nuevos_comensales = int(nuevos_comensales)
+        if nuevos_comensales <= 0:
+            flash('El número de comensales debe ser mayor a 0.', 'error')
+            return redirect(url_for('vista_cliente'))
+
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT TO_CHAR(FECHA_EVENTO, 'DD/MM/YYYY')
+            FROM proyecto
+            WHERE ID_PROYECTO = :1 AND ID_USUARIO = :2
+        """, [proyecto_id, session['usuario_id']])
+        resultado = cursor.fetchone()
+        
+        if not resultado:
+            flash('Proyecto no encontrado o no pertenece al usuario.', 'error')
+            cursor.close()
+            conexion.close()
+            return redirect(url_for('vista_cliente'))
+
+        fecha_evento_str = resultado[0]
+        fecha_evento = datetime.strptime(fecha_evento_str, '%d/%m/%Y')
+        fecha_actual = datetime.now()
+        diferencia_dias = (fecha_evento - fecha_actual).days
+
+        if diferencia_dias < 5:
+            flash('No se puede actualizar el número de comensales. Faltan menos de 5 días para el evento.', 'error')
+            cursor.close()
+            conexion.close()
+            return redirect(url_for('vista_cliente'))
+
+        cursor.execute("""
+            UPDATE proyecto
+            SET COMENSALES = :1
+            WHERE ID_PROYECTO = :2
+        """, [nuevos_comensales, proyecto_id])
+        conexion.commit()
+        
+        flash('Número de comensales actualizado exitosamente.', 'success')
+        cursor.close()
+        conexion.close()
+        
+    except ValueError:
+        flash('El número de comensales debe ser un número válido.', 'error')
+    except Exception as e:
+        print("Error actualizando comensales:", e)
+        flash('Error al actualizar el número de comensales.', 'error')
+    
+    return redirect(url_for('vista_cliente'))
+
+
 ##########Vista Gerente
 @app.route('/gerente/dashboard')
 def dashboard_gerente():
@@ -1681,6 +1933,38 @@ def logout():
 
 
 
+# ... (todas tus rutas anteriores)
 
+#========================================================
+# Ruta para eliminar un gerente
+#========================================================
+@app.route('/admin/eliminar_gerente/<id_gerente>', methods=['POST'])
+def eliminar_gerente(id_gerente):
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("DELETE FROM GERENTE_SALON WHERE ID_GERENTE = :1", (id_gerente,))
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        flash('Gerente eliminado correctamente', 'success')
+    except Exception as e:
+        print("Error al eliminar gerente:", e)
+        flash('Error al eliminar gerente', 'danger')
+    return redirect(url_for('gerente_salon'))
+
+
+
+
+
+
+
+
+
+
+
+# Este bloque debe ir al final del archivo
 if __name__ == '__main__':
     app.run(debug=True)
+
+

@@ -8,81 +8,91 @@
         <h2 class="mb-3 mb-md-0">Registrar Nuevo Proyecto</h2>
     </div>
 
-    <form method="POST" action="{{ url_for('registrar') }}" class="row g-3 needs-validation" novalidate>
+    <form method="POST" action="{{ url_for('registrar_proyecto') }}" class="row g-3 needs-validation" novalidate>
 
-        <!-- RFC -->
+        <!-- Comenzales -->
         <div class="col-md-4">
-            <label for="rfc" class="form-label">RFC</label>
-            <input type="text" class="form-control" name="rfc" id="rfc"
-                placeholder="XXXX-XXXXXX-XXX"
-                pattern="^[A-ZÑ&]{3,4}\d{6}[A-Z0-9]{3}$" maxlength="13"
-                title="Introduce un RFC válido con 13 caracteres (letras y números))"
-                required autocomplete="off">
-            <div class="rfc_invalido">
-                    Por favor ingrese un RFC válido
+            <label for="comensalesA" class="form-label">No. Comensales</label>
+            <input type="number" class="form-control" name="comensalesA" id="comensalesA" min="1" placeholder="Ingresa una cantidad de comensales" required>
+        </div>
+
+        <!-- Salon -->
+        <div class="col-md-4">
+            <label for="salonA" class="form-label">Salon:</label>
+            <select name="salonA" id="salonA" class="form-select" required>
+                <option value="" selected disabled>Selecciona un salon</option>
+                {% for salon in salones %}
+                    <option value="{{salon.id_salon}}">{{salon.nombre_salon}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Gerente -->
+        <div class="col-md-4">
+            <label for="gerenteA" class="form-label">Gerente:</label>
+            <select name="gerenteA" id="gerenteA" class="form-select" required>
+                <option value="" selected disabled>Selecciona un gerente</option>
+                {% for gerente in gerentes %}
+                    <option value="{{gerente.id_gerente}}">{{gerente.nombre_gerente}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Usuario -->
+        <div class="col-md-4">
+            <label for="nombre" class="form-label">Usuario:</label>
+            <select name="usuarioA" id="usuarioA" class="form-select" required>
+                <option value="" selected disabled>Selecciona un usuario</option>
+                {% for usuario in usuarios %}
+                    <option value="{{usuario.id_usuario}}">{{usuario.nombre_usuario}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Paquete -->
+        <div class="col-md-4">
+            <label for="paquete" class="form-label">Paquete:</label>
+            <select name="paqueteA" id="paqueteA" class="form-select" required>
+                <option value="" selected disabled>Selecciona un paquete</option>
+                {% for paquete in paquetes %}
+                    <option value="{{paquete.id_paquete}}">{{paquete.nombre_paquete}}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Fecha evento -->
+        <div class="col-md-4">
+            <label for="fechaA" class="form-label">Fecha del evento: </label>
+            <input type="date" class="form-control" name="fechaA" id="fechaA" required>
+        </div>
+
+        <!-- Anticipo -->
+        <div class="col-md-4">
+            <label for="anticipoA" class="form-label">Anticipo:</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" class="form-control" name="anticipoA" id="anticipoA" min="1" step="1" required>
             </div>
         </div>
 
-        <!-- CURP -->
+        <!-- Estatus evento -->
         <div class="col-md-4">
-            <label for="curp" class="form-label">CURP</label>
-            <input type="text" class="form-control" name="curp" id="curp" required placeholder="XXXX-XXXXXX-X-XX-XXX-X-X"
-            maxlength="18" pattern="^[A-Z]{4}\d{6}[HM][A-Z]{5}[A-Z0-9]\d$" 
-           title="Introduce un CURP válido con 18 caracteres ()letras y números" autocomplete="off" inputmode="text">
-        </div>
-
-        <!-- Contraseña -->
-        <div class="col-md-4">
-            <label for="pass" class="form-label">Contraseña</label>
-            <input type="password" class="form-control" name="pass" id="pass" required autocomplete="new-password">
-        </div>
-
-        <!-- Nombre completo -->
-        <div class="col-md-4">
-            <label for="nombre" class="form-label">Nombre(s)</label>
-            <input type="text" class="form-control" name="nombre" id="nombre" required>
-        </div>
-        <div class="col-md-4">
-            <label for="apaterno" class="form-label">Apellido Paterno</label>
-            <input type="text" class="form-control" name="apaterno" id="apaterno" required>
-        </div>
-        <div class="col-md-4">
-            <label for="amaterno" class="form-label">Apellido Materno</label>
-            <input type="text" class="form-control" name="amaterno" id="amaterno" required>
-        </div>
-
-        <!-- Dirección -->
-        <div class="col-md-6">
-            <label for="calle" class="form-label">Calle</label>
-            <input type="text" class="form-control" name="calle" id="calle" required>
-        </div>
-        <div class="col-md-2">
-            <label for="numero" class="form-label">Número</label>
-            <input type="text" class="form-control" name="numero" id="numero" required>
-        </div>
-        <div class="col-md-4">
-            <label for="localidad" class="form-label">Localidad</label>
-            <input type="text" class="form-control" name="localidad" id="localidad" required>
-        </div>
-        <div class="col-md-4">
-            <label for="municipio" class="form-label">Municipio</label>
-            <input type="text" class="form-control" name="municipio" id="municipio" required>
-        </div>
-        <div class="col-md-4">
-            <label for="estado" class="form-label">Estado</label>
-            <input type="text" class="form-control" name="estado" id="estado" required>
-        </div>
-        <div class="col-md-4">
-            <label for="c_postal" class="form-label">Código Postal</label>
-            <input type="text" class="form-control" name="c_postal" id="c_postal" required>
+            <label for="estatusA" class="form-label">Estatus del evento:</label>
+            <select name="estatusA" id="estatusA" class="form-select" required>
+                <option value="" selected disabled>Selecciona un estado</option>
+                <option value="0">Pendiente</option>
+                <option value="1">Activo</option>
+                <option value="2">Cancelado</option>
+                <option value="3">Completado</option>
+            </select>
         </div>
 
         <!-- Botones -->
         <div class="col-12 mt-4">
             <button class="btn btn-success" type="submit">
-                <i class="fa-solid fa-user-plus me-1"></i> Registrar Usuario
+                <i class="fa-solid fa-list-check"></i> Registrar Proyecto
             </button>
-            <a href="{{ url_for('nuevo_proyecto') }}" class="btn btn-secondary ms-2">
+            <a href="{{ url_for('admin_proyectos') }}" class="btn btn-secondary ms-2">
                 <i class="fa-solid fa-times me-1"></i> Cancelar
             </a>
         </div>

@@ -21,7 +21,11 @@
                 <tbody>
                     {% for s in solicitudes %}
                     <tr>
-                        <td>{{ s.nombre }} {{ s.apaterno }} {{ s.amaterno }}</td>
+                        <td>
+                            <a href="{{ url_for('ver_detalle_solicitud', id=s.id) }}">
+                                {{ s.nombre }} {{ s.apaterno }} {{ s.amaterno }}
+                            </a>
+                        </td>
                         <td>{{ s.calle }} #{{ s.numero }}, {{ s.localidad }}, {{ s.municipio }}, {{ s.estado }}</td>
                         <td>{{ s.tipo_paquete|capitalize }}</td>
                         <td>{{ s.tipo_anticipo|capitalize }}</td>
