@@ -29,6 +29,9 @@ def index():
         platillos=obtener_platillos(),
         complementos=obtener_complementos())
 
+#======================================================
+# Ruta para los Proyectos
+#======================================================
 @app.route('/admin/proyectos')
 def admin_proyectos():
     try:
@@ -268,7 +271,178 @@ def registrar_proyecto():
         print("❌ ERROR al registrar proyecto:", e)
         flash("⚠️ El proyecto no se pudo registrar. Verifica los datos ingresados")
 
+@app.route('/admin/editar_proyecto/<int:id_proyecto>')
+def editar_proyecto(id_proyecto):
+    try:
+        #crear conexion a la bd
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+        
+        # Obtener los datos del proyecto a editar
+        queryProyecto = '''
+        SELECT 
+            ID_PROYECTO, COMENSALES, ID_SALON, ID_GERENTE, 
+            ID_USUARIO, ID_PAQUETE, FECHA_EVENTO, ANTICIPO, ESTATUS_EVENTO
+        FROM 
+            PROYECTO 
+        WHERE 
+            ID_PROYECTO = :id_proyecto
+        '''
+        cursor1.execute(queryProyecto, {'id_proyecto': id_proyecto})
+        proyecto = cursor1.fetchone()
 
+        if not proyecto:
+            flash("⚠️ El proyecto no existe", "warning")
+            return redirect(url_for('admin_proyectos'))
+
+        #Obtener datos para los select:
+        cursor1.execute('SELECT ID_SALON, NOMBRE_SALON FROM SALON')
+        salones = [{'id_salon': row[0], 'nombre_salon': row[1]} for row in cursor1.fetchall()]
+
+        cursor1.execute('''
+            SELECT ID_GERENTE, NOMBRE || ' ' || APATERNO || ' ' || AMATERNO as NOMBRE_GERENTE 
+            FROM GERENTE_EVENTO
+        ''')
+        gerentes = [{'id_gerente': row[0], 'nombre_gerente': row[1]} for row in cursor1.fetchall()]
+
+        cursor1.execute('''
+            SELECT ID_USUARIO, NOMBRE || ' ' || APATERNO || ' ' || AMATERNO as NOMBRE_USUARIO 
+            FROM USUARIO
+        ''')
+        usuarios = [{'id_usuario': row[0], 'nombre_usuario': row[1]} for row in cursor1.fetchall()]
+
+        cursor1.execute('SELECT ID_PAQUETE, NOMBRE_PAQUETE FROM PAQUETE')
+        paquetes = [{'id_paquete': row[0], 'nombre_paquete': row[1]} for row in cursor1.fetchall()]
+
+        # Cerrar conexión
+        cursor1.close()
+        conexion.close()
+
+        # Convertir la fecha al formato que espera el input type="date"
+        fecha_evento = proyecto[6]
+        if isinstance(fecha_evento, str):
+            fecha_formateada = datetime.strptime(fecha_evento, '%d-%b-%y').strftime('%Y-%m-%d')
+        else:  # Si es un objeto datetime.date
+            fecha_formateada = fecha_evento.strftime('%Y-%m-%d')
+
+        return render_template('/administrador/editar_proyecto.html', 
+                            proyecto={
+                                'id_proyecto': proyecto[0],
+                                'comensales': proyecto[1],
+                                'id_salon': proyecto[2],
+                                'id_gerente': proyecto[3],
+                                'id_usuario': proyecto[4],
+                                'id_paquete': proyecto[5],
+                                'fecha_evento': fecha_formateada,
+                                'anticipo': proyecto[7],
+                                'estatus_evento': proyecto[8]
+                            },
+                            salones=salones,
+                            gerentes=gerentes,
+                            usuarios=usuarios,
+                            paquetes=paquetes)
+    except Exception as e:
+        print(f"Error al cargar proyecto para edición: {e}")
+        flash("⚠️ Error al cargar el proyecto para edición", "danger")
+        return redirect(url_for('admin_proyectos'))
+
+@app.route('/admin/actualizar_proyecto', methods=['POST'])
+def actualizar_proyecto():
+    try:
+        # Recuperar los datos del formulario
+        id_proyecto = request.form['id_proyecto']
+        comensales = request.form['comensalesE']
+        id_salon = request.form['salonE']
+        id_gerente = request.form['gerenteE']
+        id_usuario = request.form['usuarioE']
+        id_paquete = request.form['paqueteE']
+        fecha = request.form['fechaE']
+        anticipo = request.form['anticipoE']
+        estatus = request.form['estatusE']
+
+        # Formatear la fecha para Oracle
+        fecha_oracle = datetime.strptime(fecha, '%Y-%m-%d').strftime('%d-%b-%y').upper()
+
+        # Obtener RFC y CURP del gerente y usuario
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
+        queryGerente = '''
+        SELECT RFC, CURP FROM GERENTE_EVENTO WHERE ID_GERENTE = :id_gerente
+        '''
+        cursor1.execute(queryGerente, {'id_gerente': id_gerente})
+        rfc_gerente, curp_gerente = cursor1.fetchone() or ('', '')
+
+        queryUsuario = '''
+        SELECT RFC, CURP FROM USUARIO WHERE ID_USUARIO = :id_usuario
+        '''
+        cursor1.execute(queryUsuario, {'id_usuario': id_usuario})
+        rfc_usuario, curp_usuario = cursor1.fetchone() or ('', '')
+
+        # Actualizar el proyecto
+        queryUpdate = '''
+        UPDATE PROYECTO SET
+            COMENSALES = :1,
+            ID_SALON = :2,
+            ID_GERENTE = :3,
+            RFC_GERENTE = :4,
+            CURP_GERENTE = :5,
+            ID_USUARIO = :6,
+            RFC_USUARIO = :7,
+            CURP_USUARIO = :8,
+            ID_PAQUETE = :9,
+            FECHA_EVENTO = :10,
+            ANTICIPO = :11,
+            ESTATUS_EVENTO = :12
+        WHERE ID_PROYECTO = :13
+        '''
+        cursor1.execute(queryUpdate, [
+            comensales, id_salon, id_gerente, rfc_gerente, curp_gerente,
+            id_usuario, rfc_usuario, curp_usuario, id_paquete, fecha_oracle,
+            anticipo, estatus, id_proyecto
+        ])
+        conexion.commit()
+
+        # Cerrar conexión
+        cursor1.close()
+        conexion.close()
+
+        flash("✅ El proyecto fue actualizado exitosamente.", "success")
+        return redirect(url_for('admin_proyectos'))
+    except Exception as e:
+        print(f"Error al actualizar proyecto: {e}")
+        flash("⚠️ Error al actualizar el proyecto", "danger")
+        return redirect(url_for('editar_proyecto', id_proyecto=id_proyecto))
+
+@app.route('/admin/eliminar_proyecto/<int:id_proyecto>', methods=['GET'])
+def eliminar_proyecto(id_proyecto):
+    try:
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
+        # Verificar si el proyecto existe
+        cursor1.execute("SELECT COUNT(*) FROM PROYECTO WHERE ID_PROYECTO = :id", {'id': id_proyecto})
+        if cursor1.fetchone()[0] == 0:
+            flash("⚠️ El proyecto no existe", "warning")
+            return redirect(url_for('admin_proyectos'))
+
+        # Eliminar el proyecto
+        cursor1.execute("DELETE FROM PROYECTO WHERE ID_PROYECTO = :id", {'id': id_proyecto})
+        conexion.commit()
+
+        # Cerrar conexión
+        cursor1.close()
+        conexion.close()
+
+        flash("✅ El proyecto fue eliminado exitosamente.", "success")
+        return redirect(url_for('admin_proyectos'))
+    except Exception as e:
+        print(f"Error al eliminar proyecto: {e}")
+        flash("⚠️ Error al eliminar el proyecto", "danger")
+        return redirect(url_for('admin_proyectos'))
+#======================================================
+# Ruta para los complementos
+#======================================================
 @app.route('/admin/complementos')
 def admin_complementos():
     try:

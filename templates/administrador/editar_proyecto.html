@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %} Nuevo Proyecto {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h2 class="mb-3 mb-md-0">Editar Proyecto #{{ proyecto.id_proyecto }}</h2>
+    </div>
+
+    <form method="POST" action="{{ url_for('actualizar_proyecto') }}" class="row g-3 needs-validation" novalidate>
+        <!-- Campo oculto para el ID del proyecto -->
+        <input type="hidden" name="id_proyecto" value="{{ proyecto.id_proyecto }}">
+
+        <!-- Comenzales -->
+        <div class="col-md-4">
+            <label for="comensalesE" class="form-label">No. Comensales</label>
+            <input type="number" class="form-control" name="comensalesE" id="comensalesE" 
+                min="1" value="{{ proyecto.comensales }}" required>
+        </div>
+
+        <!-- Salon -->
+        <div class="col-md-4">
+            <label for="salonE" class="form-label">Salon:</label>
+            <select name="salonE" id="salonE" class="form-select" required>
+                <option value="" disabled>Selecciona un salon</option>
+                {% for salon in salones %}
+                    <option value="{{ salon.id_salon }}" 
+                            {% if salon.id_salon == proyecto.id_salon %}selected{% endif %}>
+                        {{ salon.nombre_salon }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Gerente -->
+        <div class="col-md-4">
+            <label for="gerenteE" class="form-label">Gerente:</label>
+            <select name="gerenteE" id="gerenteE" class="form-select" required>
+                <option value="" disabled>Selecciona un gerente</option>
+                {% for gerente in gerentes %}
+                    <option value="{{ gerente.id_gerente }}" 
+                            {% if gerente.id_gerente == proyecto.id_gerente %}selected{% endif %}>
+                        {{ gerente.nombre_gerente }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Usuario -->
+        <div class="col-md-4">
+            <label for="nombre" class="form-label">Usuario:</label>
+            <select name="usuarioE" id="usuarioE" class="form-select" required>
+                <option value="" disabled>Selecciona un usuario</option>
+                {% for usuario in usuarios %}
+                    <option value="{{ usuario.id_usuario }}" 
+                            {% if usuario.id_usuario == proyecto.id_usuario %}selected{% endif %}>
+                        {{ usuario.nombre_usuario }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Paquete -->
+        <div class="col-md-4">
+            <label for="paquete" class="form-label">Paquete:</label>
+            <select name="paqueteE" id="paqueteE" class="form-select" required>
+                <option value="" disabled>Selecciona un paquete</option>
+                {% for paquete in paquetes %}
+                    <option value="{{ paquete.id_paquete }}" 
+                            {% if paquete.id_paquete == proyecto.id_paquete %}selected{% endif %}>
+                        {{ paquete.nombre_paquete }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Fecha evento -->
+        <div class="col-md-4">
+            <label for="fechaE" class="form-label">Fecha del evento: </label>
+            <input type="date" class="form-control" name="fechaE" id="fechaE" 
+                value="{{ proyecto.fecha_evento }}" required>
+        </div>
+
+        <!-- Anticipo -->
+        <div class="col-md-4">
+            <label for="anticipoE" class="form-label">Anticipo:</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" class="form-control" name="anticipoE" id="anticipoE" 
+                    min="1" step="1" value="{{ proyecto.anticipo }}" required>
+            </div>
+        </div>
+
+        <!-- Estatus evento -->
+        <div class="col-md-4">
+            <label for="estatusE" class="form-label">Estatus del evento:</label>
+            <select name="estatusE" id="estatusE" class="form-select" required>
+                <option value="" disabled>Selecciona un estado</option>
+                <option value="0" {% if proyecto.estatus_evento == '0' %}selected{% endif %}>Pendiente</option>
+                <option value="1" {% if proyecto.estatus_evento == '1' %}selected{% endif %}>Activo</option>
+                <option value="2" {% if proyecto.estatus_evento == '2' %}selected{% endif %}>Cancelado</option>
+                <option value="3" {% if proyecto.estatus_evento == '3' %}selected{% endif %}>Completado</option>
+            </select>
+        </div>
+
+        <!-- Botones -->
+        <div class="col-12 mt-4">
+            <button class="btn btn-primary" type="submit">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+            </button>
+            <a href="{{ url_for('admin_proyectos') }}" class="btn btn-secondary ms-2">
+                <i class="fa-solid fa-times me-1"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}
