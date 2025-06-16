@@ -50,10 +50,10 @@ def admin_proyectos():
             TO_CHAR(p.FECHA_EVENTO, 'DD/MM/YYYY') AS FECHA_EVENTO_FORM,
             p.ANTICIPO,
             CASE p.ESTATUS_EVENTO 
-                WHEN 1 THEN 'Pendiente'
-                WHEN 2 THEN 'Confirmado'
-                WHEN 3 THEN 'Cancelado'
-                WHEN 4 THEN 'Completado'
+                WHEN 0 THEN 'Pendiente'
+                WHEN 1 THEN 'Activo'
+                WHEN 2 THEN 'Cancelado'
+                WHEN 3 THEN 'Completado'
                 ELSE 'Desconocido'
             END AS ESTATUS_EVENTO
         FROM 
@@ -101,8 +101,171 @@ def admin_proyectos():
 
 @app.route('/admin/nuevo_proyecto')
 def nuevo_proyecto():
-    return render_template('/administrador/nuevo_proyecto.html')
+    try:
+        #crear conexion a la bd
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
 
+        querySalon = '''
+        SELECT
+            ID_SALON,
+            NOMBRE_SALON
+        FROM
+            SALON
+        '''
+
+        queryGerente = '''
+        SELECT
+            ID_GERENTE,
+            NOMBRE || ' ' || APATERNO || ' ' || AMATERNO as NOMBRE_GERENTE
+        FROM
+            GERENTE_EVENTO
+        '''
+
+        queryUsuario = '''
+        SELECT
+            ID_USUARIO,
+            NOMBRE || ' ' || APATERNO || ' ' || AMATERNO as NOMBRE_USUARIO
+        FROM
+            USUARIO
+        '''
+
+        queryPaquete = '''
+        SELECT
+            ID_PAQUETE,
+            NOMBRE_PAQUETE
+        FROM
+            PAQUETE
+        '''
+
+        cursor1.execute(querySalon)
+        rows = cursor1.fetchall()
+        salones = []
+
+        for row in rows:
+            salones.append({
+                'id_salon': row[0],
+                'nombre_salon': row[1]
+            })
+
+        cursor1.execute(queryGerente)
+        rows = cursor1.fetchall()
+        gerentes = []
+
+        for row in rows:
+            gerentes.append({
+                'id_gerente': row[0],
+                'nombre_gerente': row[1]
+            })
+
+        cursor1.execute(queryUsuario)
+        rows = cursor1.fetchall()
+        usuarios = []
+
+        for row in rows:
+            usuarios.append({
+                'id_usuario': row[0],
+                'nombre_usuario': row[1]
+            })
+        
+        cursor1.execute(queryPaquete)
+        rows = cursor1.fetchall()
+        paquetes = []
+
+        for row in rows:
+            paquetes.append({
+                'id_paquete': row[0],
+                'nombre_paquete': row[1]
+            })
+
+        #cerrar conexion 
+        cursor1.close()
+        conexion.close()
+        
+        #print("salones: ", salones)
+        #print("Gerentes:", gerentes)
+        #print("usuarios:", usuarios)
+        #print("paquete:", paquetes)
+        
+        return render_template('/administrador/nuevo_proyecto.html', salones=salones, gerentes=gerentes, usuarios=usuarios, paquetes=paquetes)
+    except Exception as e:
+        print("Error al hacer las consultas en las respectivas tablas")
+
+@app.route('/admin/registrar_proyecto', methods=['POST'])
+def registrar_proyecto():
+    try:
+        #Recuperar los datos del formulario:
+        comensales = request.form['comensalesA']
+        id_salon = request.form['salonA']
+        id_gerente = request.form['gerenteA']
+        rfc_gerente = ''
+        curp_gerente = ''
+        id_usuario = request.form['usuarioA']
+        rfc_usuario = ''
+        curp_usuario = ''
+        id_paquete = request.form['paqueteA']
+        fecha = request.form['fechaA']
+        anticipo = request.form['anticipoA']
+        estatus = request.form['estatusA']
+
+        #Formatear la fecha para no tener problemas con la BD
+        fecha_oracle = datetime.strptime(fecha, '%Y-%m-%d').strftime('%d-%b-%y').upper()
+
+        #crear conexion a la bd
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
+        queryGerente = '''
+        SELECT
+            RFC,
+            CURP
+        FROM
+            GERENTE_EVENTO
+        WHERE ID_GERENTE = :id_gerente
+        '''
+
+        queryUsuario = '''
+        SELECT
+            RFC,
+            CURP
+        FROM
+            USUARIO
+        WHERE ID_USUARIO = :id_usuario
+        '''
+        cursor1.execute(queryGerente,{'id_gerente': id_gerente})
+        datos_gerente = cursor1.fetchone()
+
+        if datos_gerente:
+            rfc_gerente, curp_gerente = datos_gerente
+        else:
+            rfc_gerente, curp_gerente = '', ''
+
+        cursor1.execute(queryUsuario,{'id_usuario': id_usuario})
+        datos_usuario = cursor1.fetchone()
+
+        if datos_usuario:
+            rfc_usuario, curp_usuario = datos_usuario
+        else:
+            rfc_usuario, curp_usuario = '', ''
+
+        queryProyecto = '''
+        INSERT INTO PROYECTO (ID_PROYECTO,COMENSALES, ID_SALON, ID_GERENTE, RFC_GERENTE, CURP_GERENTE,
+            ID_USUARIO, RFC_USUARIO, CURP_USUARIO, ID_PAQUETE, FECHA_EVENTO, ANTICIPO, ESTATUS_EVENTO)
+            VALUES (SQ_PROYECTO.NEXTVAL, :1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12)
+        '''
+        cursor1.execute(queryProyecto, [comensales, id_salon, id_gerente, rfc_gerente, curp_gerente,
+                                        id_usuario, rfc_usuario, curp_usuario, id_paquete, fecha_oracle, anticipo, estatus])
+        conexion.commit()
+
+        #cerrar conexion 
+        cursor1.close()
+        conexion.close()
+
+        flash("✅ El proyecto fue registrado exitosamente.", "success")
+        return redirect(url_for('admin_proyectos'))
+    except Exception as e:
+        print("❌ ERROR al registrar proyecto:", e)
+        flash("⚠️ El proyecto no se pudo registrar. Verifica los datos ingresados")
 @app.route('/admin/complementos')
 def admin_complementos():
     try:

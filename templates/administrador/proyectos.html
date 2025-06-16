@@ -41,6 +41,7 @@
                         <th>Fecha evento</th>
                         <th>Anticipo</th>
                         <th>Estatus evento</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -59,6 +60,17 @@
                         <td>{{ proyecto.fecha_evento }}</td>
                         <td>${{ proyecto.anticipo }}</td>
                         <td>{{ proyecto.estatus_evento }}</td>
+                        <td>
+                            <div class="d-flex gap-2">
+                                <a href="#" class="btn btn-sm btn-warning" title="Editar">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-danger" title="Eliminar"
+                                    onclick="return confirm('¿Estás seguro de eliminar este usuario?');">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>
