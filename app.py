@@ -1182,60 +1182,60 @@ def actualizar_platillo(id):
     pass
 
 
-@app.route('/admin/platillos/populares')
-def platillos_populares():
-    try:
-        conexion = get_db_connection()
-        cursor = conexion.cursor()
+# @app.route('/admin/platillos/populares')
+# def platillos_populares():
+#     try:
+#         conexion = get_db_connection()
+#         cursor = conexion.cursor()
         
-        # Consulta para platillos más populares
-        cursor.execute("""
-            SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
-            FROM PLATILLO p
-            LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
-            LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
-            LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
-            GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
-            ORDER BY total DESC
-        """)
+#         # Consulta para platillos más populares
+#         cursor.execute("""
+#             SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
+#             FROM PLATILLO p
+#             LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
+#             LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
+#             LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
+#             GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
+#             ORDER BY total DESC
+#         """)
         
-        populares = []
-        for row in cursor:
-            populares.append({
-                'id': row[0],
-                'nombre': row[1],
-                'total': row[2]
-            })
+#         populares = []
+#         for row in cursor:
+#             populares.append({
+#                 'id': row[0],
+#                 'nombre': row[1],
+#                 'total': row[2]
+#             })
         
-        # Consulta para platillos menos populares
-        cursor.execute("""
-            SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
-            FROM PLATILLO p
-            LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
-            LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
-            LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
-            GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
-            ORDER BY total ASC
-        """)
+#         # Consulta para platillos menos populares
+#         cursor.execute("""
+#             SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
+#             FROM PLATILLO p
+#             LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
+#             LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
+#             LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
+#             GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
+#             ORDER BY total ASC
+#         """)
         
-        menos_populares = []
-        for row in cursor:
-            menos_populares.append({
-                'id': row[0],
-                'nombre': row[1],
-                'total': row[2]
-            })
+#         menos_populares = []
+#         for row in cursor:
+#             menos_populares.append({
+#                 'id': row[0],
+#                 'nombre': row[1],
+#                 'total': row[2]
+#             })
         
-        return render_template('administrador/enlistar_platillos.html',
-                             populares=populares,
-                             menos_populares=menos_populares)
+#         return render_template('administrador/enlistar_platillos.html',
+#                              populares=populares,
+#                              menos_populares=menos_populares)
         
-    except cx_Oracle.Error as error:
-        flash(f'Error al cargar platillos populares: {error}', 'danger')
-        return redirect(url_for('platillos'))
-    finally:
-        cursor.close()
-        conexion.close()
+#     except cx_Oracle.Error as error:
+#         flash(f'Error al cargar platillos populares: {error}', 'danger')
+#         return redirect(url_for('platillos'))
+#     finally:
+#         cursor.close()
+#         conexion.close()
 
 # --- Rutas para Instrucciones 
 @app.route('/admin/platillos/<int:id>/instrucciones')
@@ -1269,8 +1269,8 @@ def eliminar_instruccion(id):
     pass
 
 
-@app.route('/admin/paquetes')
-def admin_paquetes():
+@app.route('/publicos/platillos_pupulares')
+def platillos_populares():
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
@@ -1326,7 +1326,7 @@ def admin_paquetes():
         cursor.close()
         conexion.close()
 
-        return render_template('administrador/paquetes.html', 
+        return render_template('publicos/platillos_populares.html', 
                             platillos=platillos, 
                             complementos=complementos, 
                             salones=salones,
@@ -2013,9 +2013,6 @@ def eliminar_gerente(id_gerente):
         print("Error al eliminar gerente:", e)
         flash('Error al eliminar gerente', 'danger')
     return redirect(url_for('gerente_salon'))
-
-
-
 
 
 
