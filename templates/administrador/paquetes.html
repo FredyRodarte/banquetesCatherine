@@ -4,68 +4,45 @@
 
 {% block content %}
 <div class="container mt-4">
-    <h2 class="mb-4 text-center"> Paquetes existentes</h2>
+    <h2 class="mb-4 text-center">Paquetes existentes</h2>
 
-    <!-- Tabla de Platillos -->
-    <h4>🍽️ Platillos</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nombre del Platillo</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for p in platillos %}
-                <tr>
-                    <td>{{ p.nombre_platillo }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+    {% set total_paquetes = 5 %}
+
+    {% for i in range(total_paquetes) %}
+    <div class="card mb-4 shadow">
+        <div class="card-header bg-dark text-white">
+            <h5 class="mb-0">📦 Paquete {{ i + 1 }}</h5>
+        </div>
+        <div class="card-body">
+            <table class="table table-bordered table-hover">
+                <thead class="table-secondary">
+                    <tr>
+                        <th>Platillo</th>
+                        <th>Complemento 1</th>
+                        <th>Complemento 2</th>
+                        <th>Salón</th>
+                        <th>Capacidad</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>{{ platillos[i].nombre_platillo }}</td>
+                        <td>{{ complementos[i*2].nombre_complemento }}</td>
+                        <td>{{ complementos[i*2+1].nombre_complemento }}</td>
+                        <td>{{ salones[i].nombre_salon }}</td>
+                        <td>{{ salones[i].capacidad }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <!-- Aquí agregamos el precio -->
+            <div class="text-end fw-bold mt-2">
+                Precio: ${{ precios[i] }}
+            </div>
+        </div>
     </div>
+    {% endfor %}
 
-    <!-- Tabla de Complementos -->
-    <h4>🥗 Complementos</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nombre del Complemento</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for c in complementos %}
-                <tr>
-                    <td>{{ c.nombre_complemento }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Tabla de Salones -->
-    <h4>🏛️ Salones</h4>
-    <div class="table-responsive mb-4">
-        <table class="table table-bordered table-striped table-hover">
-            <thead class="table-dark">
-                <tr>
-                    <th>Nombre del Salón</th>
-                    <th>Capacidad</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in salones %}
-                <tr>
-                    <td>{{ s.nombre_salon }}</td>
-                    <td>{{ s.capacidad }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
-
-    <!-- Mensaje y botón de regreso -->
+    <!-- Botón de regreso -->
     <div class="text-center mt-5">
         <p class="lead">¿Deseas contratar nuestros servicios? <strong>Contáctanos en la página de inicio.</strong></p>
         <a href="/" class="btn btn-primary btn-lg">Volver a Inicio</a>

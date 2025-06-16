@@ -929,7 +929,9 @@ def eliminar_instruccion(id):
     # Implementación para eliminar instrucción
     pass
 
-
+#=======================================================
+# Ruta paquetes
+#=======================================================
 @app.route('/admin/paquetes')
 def admin_paquetes():
     try:
@@ -951,16 +953,22 @@ def admin_paquetes():
         salones_rows = cursor.fetchall()
         salones = [{'nombre_salon': r[0], 'capacidad': r[1]} for r in salones_rows]
 
+        # Lista manual de precios para cada paquete (ajusta los valores según los que tengas)
+        precios = [4500, 2800, 3200, 3800, 4100]  # Puedes poner los que gustes según la cantidad de paquetes
+
         cursor.close()
         conexion.close()
 
         return render_template('administrador/paquetes.html', 
                                platillos=platillos, 
                                complementos=complementos, 
-                               salones=salones)
+                               salones=salones,
+                               precios=precios)
     except Exception as e:
         print("Error al cargar datos de paquetes:", e)
         return f"Error al cargar datos de paquetes: {e}"
+
+
 
 
 
