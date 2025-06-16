@@ -42,8 +42,8 @@ def admin_proyectos():
             p.COMENSALES,
             s.NOMBRE_SALON AS NOMBRE_SALON,
             g.NOMBRE || ' ' || g.APATERNO || ' ' || g.AMATERNO AS NOMBRE_GERENTE,
-            p.RFC_GERENTE,
-            p.CURP_GERENTE,
+            p.RFC,
+            p.CURP,
             u.NOMBRE || ' ' || u.APATERNO || ' ' || u.AMATERNO AS NOMBRE_USUARIO,
             p.RFC_USUARIO,
             p.CURP_USUARIO,
@@ -1638,12 +1638,34 @@ def ver_solicitudes():
     return render_template("gerente/solicitudes.html", solicitudes=solicitudes)
 
 
+@app.route('/gerente/solicitud/form_aprobar/<int:id>')
+def form_aprobar_solicitud(id):
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("SELECT * FROM solicitud_reservacion WHERE id_solicitud = :1", [id])
+    row = cursor.fetchone()
+
+    if not row:
+        flash("Solicitud no encontrada.", "danger")
+        return redirect(url_for('ver_solicitudes'))
+
+    campos = ['id_solicitud', 'rfc', 'curp', 'apaterno', 'amaterno', 'nombre',
+              'calle', 'numero', 'localidad', 'municipio', 'estado', 'c_postal',
+              'tipo_paquete', 'tipo_anticipo', 'comprobante']
+    solicitud = dict(zip(campos, row))
+
+    return render_template("gerente/asignar_password.html", solicitud=solicitud)
+
+
 
 @app.route('/gerente/solicitud/aprobar/<int:id>', methods=['POST'])
 def aprobar_solicitud(id):
     if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
         return redirect(url_for('login'))
 
+    password = request.form['pass'] 
+    
     cursor.execute("SELECT * FROM solicitud_reservacion WHERE id_solicitud = :1", [id])
     row = cursor.fetchone()
 
@@ -1663,13 +1685,15 @@ def aprobar_solicitud(id):
                 SYSDATE, 1, 'cliente'
             )
         """, [
-            f"CL-{id:04}", row[1], row[2], password, row[3], row[4], row[5], row[6],
-            row[7], row[8], row[9], row[10], row[11], row[12]
+            f"CL-{id:04}", row[1], row[2], password, row[3], row[4], row[5],
+            row[6], row[7], row[8], row[9], row[10], row[11]
         ])
         cursor.execute("UPDATE solicitud_reservacion SET revisado = 1 WHERE id_solicitud = :1", [id])
         conn.commit()
         flash("Cliente creado correctamente.", "success")
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         return f"Error al aprobar solicitud: {e}", 500
 
     return redirect(url_for('ver_solicitudes'))
@@ -1685,6 +1709,11 @@ def rechazar_solicitud(id):
     flash("Solicitud rechazada.", "info")
     return redirect(url_for('ver_solicitudes'))
 
+
+
+#=======================================================
+# Detalles de la solicitud
+#========================================================
 @app.route('/gerente/solicitud/<int:id>')
 def ver_detalle_solicitud(id):
     if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
@@ -1703,10 +1732,6 @@ def ver_detalle_solicitud(id):
     solicitud = dict(zip(campos, row))
 
     return render_template("gerente/detalle_solicitud.html", solicitud=solicitud)
-
-
-
-
 
 
 
