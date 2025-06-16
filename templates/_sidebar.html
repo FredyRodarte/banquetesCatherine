@@ -9,7 +9,10 @@
 
         <div class="collapse navbar-collapse" id="navbarContenido">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!-- Accesible para todos -->
+                
+                <!------------------------------------------------
+                --------------- Accesible para todos -------------
+                ------------------------------------------------->
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('index') }}">🏠 Inicio</a>
                 </li>
@@ -35,9 +38,9 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('admin_proyectos') }}">💻 Proyectos</a>
                     </li>
-                    <li class="nav-item">
+                    <!-- <li class="nav-item">
                         <a class="nav-link" href="/admin/gerente_proyecto">🧑‍💼 Gerente de Proyecto</a>
-                    </li>
+                    </li>  -->
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('listar_usuario') }}">👤 Usuario</a>
                     </li>                    

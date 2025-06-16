@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Reporte de Ingredientes{% endblock %}
+
+{% block content %}
+<div class="container mt-4 fondo-blanco">
+    <h2 class="mb-4">📦 Reporte de Ingredientes por Fecha</h2>
+
+    <form method="POST" class="row g-3 mb-4">
+        <div class="col-md-4">
+            <label for="fecha_inicio" class="form-label">Desde</label>
+            <input type="date" id="fecha_inicio" name="fecha_inicio" class="form-control" value="{{ fecha_inicio }}" required>
+        </div>
+        <div class="col-md-4">
+            <label for="fecha_fin" class="form-label">Hasta</label>
+            <input type="date" id="fecha_fin" name="fecha_fin" class="form-control" value="{{ fecha_fin }}" required>
+        </div>
+        <div class="col-md-4 align-self-end">
+            <button type="submit" class="btn btn-primary w-100">Generar Reporte</button>
+        </div>
+    </form>
+
+    {% if ingredientes %}
+    <div class="mb-3 text-end">
+        <a href="{{ url_for('exportar_pdf', inicio=fecha_inicio, fin=fecha_fin) }}" class="btn btn-danger">📄 Exportar PDF</a>
+        <a href="{{ url_for('exportar_excel', inicio=fecha_inicio, fin=fecha_fin) }}" class="btn btn-success">📊 Exportar Excel</a>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover">
+            <thead class="table-dark">
+                <tr>
+                    <th>Ingrediente</th>
+                    <th>Unidad</th>
+                    <th>Cantidad Total</th>
+                    <th>Eventos</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ing in ingredientes %}
+                <tr>
+                    <td>{{ ing.nombre }}</td>
+                    <td>{{ ing.unidad }}</td>
+                    <td>{{ ing.cantidad }}</td>
+                    <td>{{ ing.eventos }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% elif fecha_inicio and fecha_fin %}
+        <div class="alert alert-warning">No se encontraron ingredientes para el rango seleccionado.</div>
+    {% endif %}
+</div>
+{% endblock %}
