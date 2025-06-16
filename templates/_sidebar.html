@@ -9,7 +9,8 @@
 
         <div class="collapse navbar-collapse" id="navbarContenido">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                <!-- Accesible para todos -->
+            {% if not session.get('usuario_id') %}
+                <!-- Accesible solo para usuarios NO autenticados -->
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url_for('index') }}">🏠 Inicio</a>
                 </li>
@@ -20,11 +21,12 @@
                     <a class="nav-link" href="{{ url_for('salones_public') }}">🏛️ Salones</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('banquetes_public') }}">📦 banquetes</a>
+                    <a class="nav-link" href="{{ url_for('banquetes_public') }}">📦 Banquetes</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/admin/paquetes">📦 Paquetes</a>
                 </li>
+            {% endif %}
 
 
                 {% if session.get('rol') == 'cliente' %}
@@ -32,11 +34,18 @@
                         <a class="nav-link" href="{{ url_for('vista_cliente') }}">📄 Mis Proyectos</a>
                     </li>
                 {% elif session.get('rol') in ['gerente_evento', 'gerente_salon', 'jefe'] %}
+
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('admin_proyectos') }}">💻 Proyectos</a>
+                        <a class="nav-link" href="{{ url_for('admin_complementos') }}">🧺​ Complementos</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/admin/gerente_proyecto">🧑‍💼 Gerente de Proyecto</a>
+                        <a class="nav-link" href="{{ url_for('listar_salones') }}">🏛️ Salones</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('banquetes_public') }}">📦 banquetes</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('admin_proyectos') }}">💻 Proyectos</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('listar_usuario') }}">👤 Usuario</a>

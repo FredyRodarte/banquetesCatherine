@@ -780,7 +780,7 @@ def admin_paquetes():
 def generar_id_gerente():
     conexion = get_db_connection()
     cursor = conexion.cursor()
-    cursor.execute("SELECT MAX(ID_GERENTE) FROM GERENTE_SALON")
+    cursor.execute("SELECT MAX(ID_GERENTE_S) FROM GERENTE_SALON")
     resultado = cursor.fetchone()
     cursor.close()
     conexion.close()
@@ -801,14 +801,14 @@ def gerente_salon():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         cursor.execute("""
-            SELECT ID_GERENTE, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL
-            FROM GERENTE_SALON ORDER BY ID_GERENTE
+            SELECT ID_GERENTE_S, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL
+            FROM GERENTE_SALON ORDER BY ID_GERENTE_S
         """)
         rows = cursor.fetchall()
         gerentes = []
         for r in rows:
             gerentes.append({
-                'id_gerente': r[0],
+                'id_gerente_s': r[0],
                 'apaterno': r[1],
                 'amaterno': r[2],
                 'nombre': r[3],
@@ -837,15 +837,15 @@ def nuevo_gerente_salon():
 
         try:
             
-            id_gerente = generar_id_gerente()  # Generar nuevo ID único
+            id_gerente_s = generar_id_gerente()  # Generar nuevo ID único
 
             conexion = get_db_connection()
             cursor = conexion.cursor()
-            print (id_gerente, apaterno, amaterno, nombre, telefono, email)
+            print (id_gerente_s, apaterno, amaterno, nombre, telefono, email)
             cursor.execute("""
                 INSERT INTO GERENTE_SALON (ID_GERENTE, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL)
                 VALUES (:1, :2, :3, :4, :5, :6)
-            """, (id_gerente, apaterno, amaterno, nombre, telefono, email))
+            """, (id_gerente_s, apaterno, amaterno, nombre, telefono, email))
             
             conexion.commit()
         
@@ -868,7 +868,7 @@ def nuevo_gerente_salon():
 #========================================================
 @app.route('/admin/actualizar_gerente', methods=['POST'])
 def actualizar_gerente():
-    id_gerente = request.form.get('id_gerente')
+    id_gerente_s = request.form.get('id_gerente')
     apaterno = request.form.get('apaterno')
     amaterno = request.form.get('amaterno')
     nombre = request.form.get('nombre')
@@ -885,8 +885,8 @@ def actualizar_gerente():
                 NOMBRE = :3,
                 TELEFONO = :4,
                 EMAIL = :5
-            WHERE ID_GERENTE = :6
-        """, (apaterno, amaterno, nombre, telefono, email, id_gerente))
+            WHERE ID_GERENTE_s = :6
+        """, (apaterno, amaterno, nombre, telefono, email, id_gerente_s))
         conexion.commit()
         cursor.close()
         conexion.close()
