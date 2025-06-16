@@ -42,8 +42,8 @@ def admin_proyectos():
             p.COMENSALES,
             s.NOMBRE_SALON AS NOMBRE_SALON,
             g.NOMBRE || ' ' || g.APATERNO || ' ' || g.AMATERNO AS NOMBRE_GERENTE,
-            p.RFC,
-            p.CURP,
+            p.RFC_GERENTE,
+            p.CURP_GERENTE,
             u.NOMBRE || ' ' || u.APATERNO || ' ' || u.AMATERNO AS NOMBRE_USUARIO,
             p.RFC_USUARIO,
             p.CURP_USUARIO,
@@ -1182,95 +1182,8 @@ def actualizar_platillo(id):
     pass
 
 
-# @app.route('/admin/platillos/populares')
-# def platillos_populares():
-#     try:
-#         conexion = get_db_connection()
-#         cursor = conexion.cursor()
-        
-#         # Consulta para platillos más populares
-#         cursor.execute("""
-#             SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
-#             FROM PLATILLO p
-#             LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
-#             LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
-#             LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
-#             GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
-#             ORDER BY total DESC
-#         """)
-        
-#         populares = []
-#         for row in cursor:
-#             populares.append({
-#                 'id': row[0],
-#                 'nombre': row[1],
-#                 'total': row[2]
-#             })
-        
-#         # Consulta para platillos menos populares
-#         cursor.execute("""
-#             SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
-#             FROM PLATILLO p
-#             LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
-#             LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
-#             LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
-#             GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
-#             ORDER BY total ASC
-#         """)
-        
-#         menos_populares = []
-#         for row in cursor:
-#             menos_populares.append({
-#                 'id': row[0],
-#                 'nombre': row[1],
-#                 'total': row[2]
-#             })
-        
-#         return render_template('administrador/enlistar_platillos.html',
-#                              populares=populares,
-#                              menos_populares=menos_populares)
-        
-#     except cx_Oracle.Error as error:
-#         flash(f'Error al cargar platillos populares: {error}', 'danger')
-#         return redirect(url_for('platillos'))
-#     finally:
-#         cursor.close()
-#         conexion.close()
-
-# --- Rutas para Instrucciones 
-@app.route('/admin/platillos/<int:id>/instrucciones')
-def ver_instrucciones(id):
-    # Tu implementación actual
-    pass
-
-@app.route('/admin/platillos/<int:id_platillo>/instrucciones/nueva', methods=['GET'])
-def agregar_instruccion(id_platillo):
-    return render_template('administrador/nueva_instruccion.html', 
-                         platillo={'id': id_platillo, 'nombre': "Nombre del Platillo"})
-
-@app.route('/admin/platillos/<int:id_platillo>/instrucciones/guardar', methods=['POST'])
-def guardar_instruccion(id_platillo):
-    # Implementación para guardar nueva instrucción
-    pass
-
-@app.route('/admin/instrucciones/editar/<int:id>', methods=['GET'])
-def editar_instruccion(id):
-    # Implementación para editar instrucción
-    pass
-
-@app.route('/admin/instrucciones/actualizar/<int:id>', methods=['POST'])
-def actualizar_instruccion(id):
-    # Implementación para actualizar instrucción
-    pass
-
-@app.route('/admin/instrucciones/eliminar/<int:id>', methods=['POST'])
-def eliminar_instruccion(id):
-    # Implementación para eliminar instrucción
-    pass
-
-
-@app.route('/admin/paquetes')
-def admin_paquetes():
+@app.route('/publicos/platillos_pupulares')
+def platillos_populares():
     try:
         conexion = get_db_connection()
         cursor = conexion.cursor()
@@ -1323,8 +1236,80 @@ def admin_paquetes():
         salones_rows = cursor.fetchall()
         salones = [{'nombre_salon': r[0], 'capacidad': r[1]} for r in salones_rows]
 
+        cursor.close()
+        conexion.close()
+
+        return render_template('publicos/platillos_populares.html', 
+                            platillos=platillos, 
+                            complementos=complementos, 
+                            salones=salones,
+                            populares=populares,
+                            menos_populares=menos_populares)
+    except Exception as e:
+        print("Error al cargar datos de paquetes:", e)
+        flash(f"Error al cargar datos de paquetes: {e}", "danger")
+        return redirect(url_for('index'))
+    
+
+# --- Rutas para Instrucciones 
+@app.route('/admin/platillos/<int:id>/instrucciones')
+def ver_instrucciones(id):
+    # Tu implementación actual
+    pass
+
+@app.route('/admin/platillos/<int:id_platillo>/instrucciones/nueva', methods=['GET'])
+def agregar_instruccion(id_platillo):
+    return render_template('administrador/nueva_instruccion.html', 
+                         platillo={'id': id_platillo, 'nombre': "Nombre del Platillo"})
+
+@app.route('/admin/platillos/<int:id_platillo>/instrucciones/guardar', methods=['POST'])
+def guardar_instruccion(id_platillo):
+    # Implementación para guardar nueva instrucción
+    pass
+
+@app.route('/admin/instrucciones/editar/<int:id>', methods=['GET'])
+def editar_instruccion(id):
+    # Implementación para editar instrucción
+    pass
+
+@app.route('/admin/instrucciones/actualizar/<int:id>', methods=['POST'])
+def actualizar_instruccion(id):
+    # Implementación para actualizar instrucción
+    pass
+
+@app.route('/admin/instrucciones/eliminar/<int:id>', methods=['POST'])
+def eliminar_instruccion(id):
+    # Implementación para eliminar instrucción
+    pass
+
+
+
+#=======================================================
+# Ruta paquetes
+#=======================================================
+@app.route('/admin/paquetes')
+def admin_paquetes():
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+
+        query_platillos = "SELECT NOMBRE_PLATILLO FROM platillo ORDER BY NOMBRE_PLATILLO"
+        cursor.execute(query_platillos)
+        platillos_rows = cursor.fetchall()
+        platillos = [{'nombre_platillo': r[0]} for r in platillos_rows]
+
+        query_complementos = "SELECT NOMBRE_COMPLEMENTO FROM complemento ORDER BY NOMBRE_COMPLEMENTO"
+        cursor.execute(query_complementos)
+        complementos_rows = cursor.fetchall()
+        complementos = [{'nombre_complemento': r[0]} for r in complementos_rows]
+
+        query_salones = "SELECT NOMBRE_SALON, CAPACIDAD FROM salon ORDER BY NOMBRE_SALON"
+        cursor.execute(query_salones)
+        salones_rows = cursor.fetchall()
+        salones = [{'nombre_salon': r[0], 'capacidad': r[1]} for r in salones_rows]
+
         # Lista manual de precios para cada paquete (ajusta los valores según los que tengas)
-        precios = [4500, 2800, 3200, 3800, 4100]  # Puedes poner los que gustes según la cantidad de paquetes
+        precios = [2500, 2800, 3200]  # Puedes poner los que gustes según la cantidad de paquetes
 
         cursor.close()
         conexion.close()
@@ -1332,16 +1317,11 @@ def admin_paquetes():
         return render_template('administrador/paquetes.html', 
                                platillos=platillos, 
                                complementos=complementos, 
-                               salones=salones)
+                               salones=salones,
+                               precios=precios)
     except Exception as e:
         print("Error al cargar datos de paquetes:", e)
-        flash(f"Error al cargar datos de paquetes: {e}", "danger")
-        return redirect(url_for('index'))
-
-
-
-
-
+        return f"Error al cargar datos de paquetes: {e}"
 
 
 #=======================================================
@@ -1619,10 +1599,10 @@ def reservar():
 
     return render_template('/publicos/reservar.html')
 
+
 #=======================================================
 # Ruta para Gerente apruebe solicitud
 #========================================================
-
 
 @app.route('/gerente/solicitudes')
 def ver_solicitudes():
@@ -1754,9 +1734,6 @@ def ver_detalle_solicitud(id):
     solicitud = dict(zip(campos, row))
 
     return render_template("gerente/detalle_solicitud.html", solicitud=solicitud)
-
-
-
 
 
 
@@ -2004,7 +1981,7 @@ def logout():
 
 
 
-# ... (todas tus rutas anteriores)
+
 
 #========================================================
 # Ruta para eliminar un gerente
