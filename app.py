@@ -1292,6 +1292,24 @@ def rechazar_solicitud(id):
     flash("Solicitud rechazada.", "info")
     return redirect(url_for('ver_solicitudes'))
 
+@app.route('/gerente/solicitud/<int:id>')
+def ver_detalle_solicitud(id):
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("SELECT * FROM solicitud_reservacion WHERE id_solicitud = :1", [id])
+    row = cursor.fetchone()
+
+    if not row:
+        flash("Solicitud no encontrada.", "danger")
+        return redirect(url_for('ver_solicitudes'))
+
+    campos = ['id_solicitud', 'rfc', 'curp', 'apaterno', 'amaterno', 'nombre',
+              'calle', 'numero', 'localidad', 'municipio', 'estado', 'c_postal',
+              'tipo_paquete', 'tipo_anticipo', 'comprobante']
+    solicitud = dict(zip(campos, row))
+
+    return render_template("gerente/detalle_solicitud.html", solicitud=solicitud)
 
 
 
