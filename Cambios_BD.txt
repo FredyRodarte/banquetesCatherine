@@ -106,4 +106,15 @@ ALTER TABLE complemento ADD precio NUMBER(10, 2);
 --------------------Para paquetes-----------------------
 ALTER TABLE PAQUETE ADD PRECIO NUMBER(10, 2);
 
+--------------------Para notificaciones al gerente-----------------
+CREATE TABLE NOTIFICACION_GERENTE (
+    ID_NOTIFICACION     NUMBER PRIMARY KEY,
+    ID_GERENTE_S        VARCHAR2(10),
+    TITULO              VARCHAR2(100),
+    MENSAJE             VARCHAR2(400),
+    FECHA               DATE DEFAULT SYSDATE,
+    LEIDA               NUMBER(1) DEFAULT 0, -- 0 = No leída, 1 = Leída
+    FOREIGN KEY (ID_GERENTE_S) REFERENCES GERENTE_SALON(ID_GERENTE_S)
+);
 
+CREATE SEQUENCE SEQ_NOTIFICACION_GERENTE START WITH 1 INCREMENT BY 1;
