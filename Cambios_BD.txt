@@ -102,3 +102,6 @@ ALTER TABLE salon ADD precio NUMBER(10, 2);
 ALTER TABLE platillo ADD precio NUMBER(10, 2);
 ALTER TABLE complemento ADD precio NUMBER(10, 2);
 >>>>>>> 4fc201181b3d36b1af2a668d1febf1866b7cac48
+
+--------------------Para paquetes-----------------------
+ALTER TABLE PAQUETE ADD PRECIO NUMBER(10, 2);
