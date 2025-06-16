@@ -63,10 +63,10 @@
                         <td>{{ proyecto.estatus_evento }}</td>
                         <td>
                             <div class="d-flex gap-2">
-                                <a href="#" class="btn btn-sm btn-warning" title="Editar">
+                                <a href="{{url_for('editar_proyecto', id_proyecto=proyecto.id_proyecto)}}" class="btn btn-sm btn-warning" title="Editar">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
-                                <a href="#" class="btn btn-sm btn-danger" title="Eliminar"
+                                <a href="{{url_for('eliminar_proyecto', id_proyecto=proyecto.id_proyecto)}}" class="btn btn-sm btn-danger" title="Eliminar"
                                     onclick="return confirm('¿Estás seguro de eliminar este usuario?');">
                                     <i class="fa-solid fa-trash"></i>
                                 </a>
