@@ -26,23 +26,22 @@
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{{ platillos[i].nombre_platillo }}</td>
-                        <td>{{ complementos[i*2].nombre_complemento }}</td>
-                        <td>{{ complementos[i*2+1].nombre_complemento }}</td>
-                        <td>{{ salones[i].nombre_salon }}</td>
-                        <td>{{ salones[i].capacidad }}</td>
+                        <td>{{ platillos[i].nombre_platillo if platillos|length > i else "Platillo demo" }}</td>
+                        <td>{{ complementos[i*2].nombre_complemento if complementos|length > i*2 else "Complemento A" }}</td>
+                        <td>{{ complementos[i*2+1].nombre_complemento if complementos|length > i*2+1 else "Complemento B" }}</td>
+                        <td>{{ salones[i].nombre_salon if salones|length > i else "Salón demo" }}</td>
+                        <td>{{ salones[i].capacidad if salones|length > i else 100 + i*50 }}</td>
                     </tr>
                 </tbody>
             </table>
-            <!-- Aquí agregamos el precio -->
+
             <div class="text-end fw-bold mt-2">
-                Precio: ${{ precios[i] }}
+                Precio: ${{ precios[i] if precios|length > i else 2500 + i*300 }}
             </div>
         </div>
     </div>
     {% endfor %}
 
-    <!-- Botón de regreso -->
     <div class="text-center mt-5">
         <p class="lead">¿Deseas contratar nuestros servicios? <strong>Contáctanos en la página de inicio.</strong></p>
         <a href="/" class="btn btn-primary btn-lg">Volver a Inicio</a>
