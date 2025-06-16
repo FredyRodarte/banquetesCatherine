@@ -2,6 +2,9 @@ from flask import Flask, render_template, session, request, redirect, url_for, f
 from datetime import datetime
 import cx_Oracle
 import re
+import os
+from werkzeug.utils import secure_filename
+
 
 dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xe") 
 conn = cx_Oracle.connect(user="banquetes", password="banquetes", dsn=dsn)
@@ -1025,6 +1028,48 @@ def obtener_complementos():
     resultados = cursor.fetchall()
     return [{'id': r[0], 'nombre': r[1]} for r in resultados]
     #return [{'id': row[0], 'nombre': row[1], 'precio': row[2]} for row in  cursor.fetchall()]
+
+#========================================================
+# Ruta para reservar
+#========================================================
+UPLOAD_FOLDER = 'static/comprobantes/'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/reservar', methods=['GET', 'POST'])
+def reservar():
+    if request.method == 'POST':
+        campos = ['rfc', 'curp', 'apaterno', 'amaterno', 'nombre', 'calle',
+                  'numero', 'localidad', 'municipio', 'estado', 'c_postal',
+                  'tipo_paquete', 'tipo_anticipo']
+        datos = [request.form.get(c) for c in campos]
+
+        tipo_anticipo = request.form.get('tipo_anticipo')
+        comprobante_archivo = request.files.get('comprobante')
+        comprobante_nombre = 'pendiente'
+
+        if tipo_anticipo == 'transferencia' and comprobante_archivo:
+            comprobante_nombre = secure_filename(comprobante_archivo.filename)
+            ruta = os.path.join(UPLOAD_FOLDER, comprobante_nombre)
+            comprobante_archivo.save(ruta)
+
+        try:
+            cursor.execute("""
+                INSERT INTO solicitud_reservacion (
+                    rfc, curp, apaterno, amaterno, nombre, calle, numero,
+                    localidad, municipio, estado, c_postal,
+                    tipo_paquete, tipo_anticipo, comprobante
+                ) VALUES (
+                    :1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12,
+                    :13, :14
+                )
+            """, datos + [comprobante_nombre])
+            conn.commit()
+            flash("Solicitud registrada correctamente.", "success")
+            return redirect(url_for('reservar'))
+        except Exception as e:
+            return f"Error al guardar solicitud: {e}", 500
+
+    return render_template('/publicos/reservar.html')
 
     
 
