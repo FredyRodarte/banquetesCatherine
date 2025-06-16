@@ -1204,7 +1204,99 @@ def reservar():
 
     return render_template('/publicos/reservar.html')
 
-    
+#=======================================================
+# Ruta para Gerente apruebe solicitud
+#========================================================
+
+
+@app.route('/gerente/solicitudes')
+def ver_solicitudes():
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("""
+        SELECT id_solicitud, rfc, curp, apaterno, amaterno, nombre, calle, numero,
+               localidad, municipio, estado, c_postal, tipo_paquete, tipo_anticipo, comprobante
+        FROM solicitud_reservacion
+        WHERE revisado = 0
+    """)
+    rows = cursor.fetchall()
+
+    solicitudes = []
+    for row in rows:
+        solicitudes.append({
+            'id': row[0],
+            'rfc': row[1],
+            'curp': row[2],
+            'apaterno': row[3],
+            'amaterno': row[4],
+            'nombre': row[5],
+            'calle': row[6],
+            'numero': row[7],
+            'localidad': row[8],
+            'municipio': row[9],
+            'estado': row[10],
+            'c_postal': row[11],
+            'tipo_paquete': row[12],
+            'tipo_anticipo': row[13],
+            'comprobante': row[14]
+        })
+
+    return render_template("gerente/solicitudes.html", solicitudes=solicitudes)
+
+
+
+@app.route('/gerente/solicitud/aprobar/<int:id>', methods=['POST'])
+def aprobar_solicitud(id):
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("SELECT * FROM solicitud_reservacion WHERE id_solicitud = :1", [id])
+    row = cursor.fetchone()
+
+    if not row:
+        flash("Solicitud no encontrada.", "danger")
+        return redirect(url_for('ver_solicitudes'))
+
+    try:
+        cursor.execute("""
+            INSERT INTO usuario (
+                id_usuario, rfc, curp, pass, apaterno, amaterno, nombre,
+                calle, numero, localidad, municipio, estado, c_postal,
+                ultimo_acceso, estatus, rol
+            ) VALUES (
+                :1, :2, :3, :4, :5, :6, :7,
+                :8, :9, :10, :11, :12, :13,
+                SYSDATE, 1, 'cliente'
+            )
+        """, [
+            f"CL-{id:04}", row[1], row[2], password, row[3], row[4], row[5], row[6],
+            row[7], row[8], row[9], row[10], row[11], row[12]
+        ])
+        cursor.execute("UPDATE solicitud_reservacion SET revisado = 1 WHERE id_solicitud = :1", [id])
+        conn.commit()
+        flash("Cliente creado correctamente.", "success")
+    except Exception as e:
+        return f"Error al aprobar solicitud: {e}", 500
+
+    return redirect(url_for('ver_solicitudes'))
+
+
+@app.route('/gerente/solicitud/rechazar/<int:id>', methods=['POST'])
+def rechazar_solicitud(id):
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("UPDATE solicitud_reservacion SET revisado = 1 WHERE id_solicitud = :1", [id])
+    conn.commit()
+    flash("Solicitud rechazada.", "info")
+    return redirect(url_for('ver_solicitudes'))
+
+
+
+
+
+
 
 
 #=======================================================
