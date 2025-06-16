@@ -7,6 +7,23 @@
     <h2 class="text-center mb-4">Bienvenido, {{ session.get('nombre') }}</h2>
     <p class="text-center">Este es tu panel como {{ session.get('rol').replace('_', ' ')|capitalize }}.</p>
 
+    <!-- 🔔 Notificaciones no leídas -->
+    {% if notificaciones %}
+    <div class="alert alert-info">
+        <h5 class="mb-3">🔔 Tienes {{ notificaciones|length }} notificación(es) nueva(s)</h5>
+        <ul class="list-group">
+            {% for n in notificaciones %}
+            <li class="list-group-item">
+                <strong>{{ n.titulo }}</strong><br>
+                {{ n.mensaje }}<br>
+                <small class="text-muted">{{ n.fecha.strftime('%d/%m/%Y %H:%M') }}</small>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+
+    <!-- Panel de acciones -->
     <div class="row justify-content-center mt-4">
         <div class="col-md-4">
             <a href="{{ url_for('admin_proyectos') }}" class="btn btn-primary w-100 mb-2">
@@ -22,3 +39,4 @@
     </div>
 </div>
 {% endblock %}
+
