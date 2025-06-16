@@ -4,10 +4,8 @@ from xhtml2pdf import pisa
 from io import BytesIO
 import cx_Oracle
 import re
-from flask import render_template
 import os
 from werkzeug.utils import secure_filename
-
 import pandas as pd
 
 dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xe") 
@@ -99,7 +97,7 @@ def admin_proyectos():
         conexion.close()
         return render_template('/administrador/proyectos.html', proyectos=proyectos)
     except Exception as e:
-        print("Error al cargar proyectos")
+        print("Error al cargar proyectos", e)
         return render_template('index.html')
 
 @app.route('/admin/nuevo_proyecto')
