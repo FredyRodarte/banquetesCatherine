@@ -1,5 +1,5 @@
 from flask import Flask, render_template, session, request, redirect, url_for, flash
-from datetime import datetime
+from datetime import datetime, timedelta
 import cx_Oracle
 import re
 from flask import render_template
@@ -1606,7 +1606,10 @@ def login():
 
     return render_template('login.html')
 
-###########Vista cliente
+
+#========================================================
+# Ruta Vista cliente
+#========================================================
 
 @app.route('/cliente/proyectos')
 def vista_cliente():
@@ -1640,6 +1643,74 @@ def vista_cliente():
         print("Error cliente:", e)
         return "Error cargando proyectos"
     
+#========================================================
+# Ruta para añadir comensales
+#========================================================
+
+@app.route('/cliente/actualizar_comensales', methods=['POST'])
+def actualizar_comensales():
+    if 'usuario_id' not in session or session.get('rol') != 'cliente':
+        return redirect(url_for('login'))
+
+    proyecto_id = request.form.get('proyecto_id')
+    nuevos_comensales = request.form.get('comensales')
+    
+    try:
+        if not proyecto_id or not nuevos_comensales:
+            flash('ID del proyecto y número de comensales son requeridos.', 'error')
+            return redirect(url_for('vista_cliente'))
+        
+        nuevos_comensales = int(nuevos_comensales)
+        if nuevos_comensales <= 0:
+            flash('El número de comensales debe ser mayor a 0.', 'error')
+            return redirect(url_for('vista_cliente'))
+
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("""
+            SELECT TO_CHAR(FECHA_EVENTO, 'DD/MM/YYYY')
+            FROM proyecto
+            WHERE ID_PROYECTO = :1 AND ID_USUARIO = :2
+        """, [proyecto_id, session['usuario_id']])
+        resultado = cursor.fetchone()
+        
+        if not resultado:
+            flash('Proyecto no encontrado o no pertenece al usuario.', 'error')
+            cursor.close()
+            conexion.close()
+            return redirect(url_for('vista_cliente'))
+
+        fecha_evento_str = resultado[0]
+        fecha_evento = datetime.strptime(fecha_evento_str, '%d/%m/%Y')
+        fecha_actual = datetime.now()
+        diferencia_dias = (fecha_evento - fecha_actual).days
+
+        if diferencia_dias < 5:
+            flash('No se puede actualizar el número de comensales. Faltan menos de 5 días para el evento.', 'error')
+            cursor.close()
+            conexion.close()
+            return redirect(url_for('vista_cliente'))
+
+        cursor.execute("""
+            UPDATE proyecto
+            SET COMENSALES = :1
+            WHERE ID_PROYECTO = :2
+        """, [nuevos_comensales, proyecto_id])
+        conexion.commit()
+        
+        flash('Número de comensales actualizado exitosamente.', 'success')
+        cursor.close()
+        conexion.close()
+        
+    except ValueError:
+        flash('El número de comensales debe ser un número válido.', 'error')
+    except Exception as e:
+        print("Error actualizando comensales:", e)
+        flash('Error al actualizar el número de comensales.', 'error')
+    
+    return redirect(url_for('vista_cliente'))
+
+
 ##########Vista Gerente
 @app.route('/gerente/dashboard')
 def dashboard_gerente():
@@ -1668,6 +1739,38 @@ def logout():
 
 
 
+# ... (todas tus rutas anteriores)
 
+#========================================================
+# Ruta para eliminar un gerente
+#========================================================
+@app.route('/admin/eliminar_gerente/<id_gerente>', methods=['POST'])
+def eliminar_gerente(id_gerente):
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("DELETE FROM GERENTE_SALON WHERE ID_GERENTE = :1", (id_gerente,))
+        conexion.commit()
+        cursor.close()
+        conexion.close()
+        flash('Gerente eliminado correctamente', 'success')
+    except Exception as e:
+        print("Error al eliminar gerente:", e)
+        flash('Error al eliminar gerente', 'danger')
+    return redirect(url_for('gerente_salon'))
+
+
+
+
+
+
+
+
+
+
+
+# Este bloque debe ir al final del archivo
 if __name__ == '__main__':
     app.run(debug=True)
+
+
