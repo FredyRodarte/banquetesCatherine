@@ -1293,34 +1293,52 @@ def admin_paquetes():
         conexion = get_db_connection()
         cursor = conexion.cursor()
 
-        query_platillos = "SELECT NOMBRE_PLATILLO FROM platillo ORDER BY NOMBRE_PLATILLO"
-        cursor.execute(query_platillos)
-        platillos_rows = cursor.fetchall()
-        platillos = [{'nombre_platillo': r[0]} for r in platillos_rows]
+        # Obtener platillos
+        cursor.execute("SELECT NOMBRE_PLATILLO FROM platillo ORDER BY NOMBRE_PLATILLO")
+        platillos = [r[0] for r in cursor.fetchall()]
+        if not platillos:
+            platillos = ["Platillo ejemplo 1", "Platillo ejemplo 2", "Platillo ejemplo 3"]
 
-        query_complementos = "SELECT NOMBRE_COMPLEMENTO FROM complemento ORDER BY NOMBRE_COMPLEMENTO"
-        cursor.execute(query_complementos)
-        complementos_rows = cursor.fetchall()
-        complementos = [{'nombre_complemento': r[0]} for r in complementos_rows]
+        # Obtener complementos
+        cursor.execute("SELECT NOMBRE_COMPLEMENTO FROM complemento ORDER BY NOMBRE_COMPLEMENTO")
+        complementos = [r[0] for r in cursor.fetchall()]
+        if not complementos:
+            complementos = ["Complemento ejemplo 1", "Complemento ejemplo 2", "Complemento ejemplo 3"]
 
-        query_salones = "SELECT NOMBRE_SALON, CAPACIDAD FROM salon ORDER BY NOMBRE_SALON"
-        cursor.execute(query_salones)
+        # Obtener salones
+        cursor.execute("SELECT NOMBRE_SALON, CAPACIDAD FROM salon ORDER BY NOMBRE_SALON")
         salones_rows = cursor.fetchall()
-        salones = [{'nombre_salon': r[0], 'capacidad': r[1]} for r in salones_rows]
+        if not salones_rows:
+            salones = [
+                {'nombre_salon': "Salón ejemplo 1", 'capacidad': 100},
+                {'nombre_salon': "Salón ejemplo 2", 'capacidad': 200},
+                {'nombre_salon': "Salón ejemplo 3", 'capacidad': 300}
+            ]
+        else:
+            salones = [{'nombre_salon': r[0], 'capacidad': r[1]} for r in salones_rows]
 
-        # Lista manual de precios para cada paquete (ajusta los valores según los que tengas)
-        precios = [2500, 2800, 3200]  # Puedes poner los que gustes según la cantidad de paquetes
+        # Precios predefinidos
+        precios = [2500, 2800, 3200]
+
+        # Armar paquetes seguros
+        paquetes = []
+        for i in range(3):  # Mostrar 3 paquetes como ejemplo
+            paquetes.append({
+                'platillo': platillos[i] if i < len(platillos) else f"Platillo #{i+1}",
+                'complemento': complementos[i] if i < len(complementos) else f"Complemento #{i+1}",
+                'salon': salones[i]['nombre_salon'] if i < len(salones) else f"Salón #{i+1}",
+                'capacidad': salones[i]['capacidad'] if i < len(salones) else 100 + (i * 50),
+                'precio_total': precios[i] if i < len(precios) else 2500 + (i * 300)
+            })
 
         cursor.close()
         conexion.close()
 
-        return render_template('administrador/paquetes.html', 
-                               platillos=platillos, 
-                               complementos=complementos, 
-                               salones=salones,
-                               precios=precios)
+        return render_template('administrador/paquetes.html',
+                               paquetes=paquetes)
+
     except Exception as e:
-        print("Error al cargar datos de paquetes:", e)
+        print("❌ Error al cargar datos de paquetes:", e)
         return f"Error al cargar datos de paquetes: {e}"
 
 
