@@ -266,6 +266,8 @@ def registrar_proyecto():
     except Exception as e:
         print("❌ ERROR al registrar proyecto:", e)
         flash("⚠️ El proyecto no se pudo registrar. Verifica los datos ingresados")
+
+
 @app.route('/admin/complementos')
 def admin_complementos():
     try:
@@ -1758,11 +1760,6 @@ def eliminar_gerente(id_gerente):
         print("Error al eliminar gerente:", e)
         flash('Error al eliminar gerente', 'danger')
     return redirect(url_for('gerente_salon'))
-
-
-
-
-
 
 
 
