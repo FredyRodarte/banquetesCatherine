@@ -56,15 +56,31 @@
                     </td>
                     <td>
                         <div class="d-flex gap-2">
+                            <!-- Botón Editar: visible si el jefe o gerente puede editar -->
+                            {% if session.get('rol') == 'jefe' 
+                                or (session.get('rol') in ['gerente_evento', 'gerente_salon'] and usuario.rol == 'cliente') %}
                             <a href="{{ url_for('editar_usuario', id=usuario.id_usuario) }}" class="btn btn-sm btn-warning" title="Editar">
                                 <i class="fa-solid fa-pen-to-square"></i>
                             </a>
-                            <a href="{{ url_for('eliminar_usuario', id=usuario.id_usuario) }}" class="btn btn-sm btn-danger" title="Eliminar"
-                                onclick="return confirm('¿Estás seguro de eliminar este usuario?');">
-                                <i class="fa-solid fa-trash"></i>
-                            </a>
+                            {% endif %}
+
+                            <!-- Botón Eliminar: 
+                                - El jefe puede eliminar a cualquiera
+                                - Los gerentes solo pueden eliminar clientes
+                                - Nadie puede eliminarse a sí mismo -->
+                            {% if session.get('usuario_id') != usuario.id_usuario %}
+                                {% if session.get('rol') == 'jefe' 
+                                    or (session.get('rol') in ['gerente_evento', 'gerente_salon'] and usuario.rol == 'cliente') %}
+                                <form action="{{ url_for('eliminar_usuario', id=usuario.id_usuario) }}" method="POST"
+                                    onsubmit="return confirm('¿Estás seguro de eliminar este usuario?');">
+                                    <button class="btn btn-sm btn-danger" title="Eliminar">
+                                        <i class="fa-solid fa-trash"></i>
+                                    </button>
+                                </form>
+                                {% endif %}
+                            {% endif %}
                         </div>
-                    </td>
+                    </td>                
                 </tr>
                 {% endfor %}
             </tbody>

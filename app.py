@@ -255,7 +255,8 @@ def listar_usuario():
                 'estado': row[11],
                 'codigo_postal': row[12],
                 'ultimo_acceso': row[13],
-                'estatus': bool(row[14])
+                'estatus': bool(row[14]),
+                'rol': row[15]
             })
 
         return render_template("administrador/usuario.html", usuarios=usuarios)
@@ -264,49 +265,203 @@ def listar_usuario():
         print(f"Error consultando usuario: {e}")
         return "Error al cargar usuario"
 
-@app.route("/admin/usuario/eliminar/<id>")
+@app.route('/admin/usuario/eliminar/<id>', methods=['POST'])
 def eliminar_usuario(id):
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    rol_sesion = session.get('rol')
+    usuario_actual = session.get('usuario_id')
+
     try:
+        # Verificamos quién se quiere eliminar
+        cursor.execute("SELECT rol FROM usuario WHERE id_usuario = :1", [id])
+        resultado = cursor.fetchone()
+
+        if not resultado:
+            flash("Usuario no encontrado.", "danger")
+            return redirect(url_for('listar_usuario'))
+
+        rol_objetivo = resultado[0]
+
+        # Reglas
+        if rol_sesion == 'jefe':
+            pass  # Puede eliminar a cualquier usuario
+
+        elif rol_sesion in ['gerente_evento', 'gerente_salon']:
+            if rol_objetivo != 'cliente':
+                flash("Como gerente, solo puedes eliminar clientes.", "warning")
+                return redirect(url_for('listar_usuario'))
+
+        else:
+            flash("No tienes permiso para eliminar usuarios.", "danger")
+            return redirect(url_for('index'))
+
+        # Acción de eliminación
         cursor.execute("DELETE FROM usuario WHERE id_usuario = :1", [id])
         conn.commit()
+        flash("Usuario eliminado correctamente.", "success")
         return redirect(url_for('listar_usuario'))
+
     except Exception as e:
-        print(f"Error al eliminar usuario con ID {id}: {e}")
-        return redirect(url_for('listar_usuario'))
+        return f"Error al eliminar: {e}", 500
+
     
 
+# @app.route('/admin/usuario/editar/<id>', methods=['GET'])
+# def editar_usuario(id):
+#     try:
+#         cursor.execute("SELECT * FROM usuario WHERE id_usuario = :1", [id])
+#         row = cursor.fetchone()
+#         if row:
+#             usuario = {
+#                 'id_usuario': row[0],
+#                 'rfc': row[1],
+#                 'curp': row[2],
+#                 'pass': row[3],
+#                 'apaterno': row[4],
+#                 'amaterno': row[5],
+#                 'nombre': row[6],
+#                 'calle': row[7],
+#                 'numero': row[8],
+#                 'localidad': row[9],
+#                 'municipio': row[10],
+#                 'estado': row[11],
+#                 'c_postal': row[12],
+#                 'ultimo_acceso': row[13],
+#                 'estatus': row[14]
+#             }
+#             return render_template("administrador/editar_usuario.html", usuario=usuario)
+#         else:
+#             return "Usuario no encontrado", 404
+#     except Exception as e:
+#         return f"Error: {e}", 500
+
+# @app.route('/admin/usuario/actualizar/<id>', methods=['POST'])
+# def actualizar_usuario(id):
+#     try:
+#         datos = (
+#             request.form['rfc'],
+#             request.form['curp'],
+#             request.form['pass'],
+#             request.form['apaterno'],
+#             request.form['amaterno'],
+#             request.form['nombre'],
+#             request.form['calle'],
+#             request.form['numero'],
+#             request.form['localidad'],
+#             request.form['municipio'],
+#             request.form['estado'],
+#             request.form['c_postal'],
+#             request.form.get('estatus', 1), 
+#             id
+#         )
+#         sql = """
+#         UPDATE usuario SET
+#             rfc = :1, curp = :2, pass = :3,
+#             apaterno = :4, amaterno = :5, nombre = :6,
+#             calle = :7, numero = :8, localidad = :9,
+#             municipio = :10, estado = :11, c_postal = :12,
+#             estatus = :13
+#         WHERE id_usuario = :14
+#         """
+#         cursor.execute(sql, datos)
+#         conn.commit()
+#         return redirect(url_for('listar_usuario'))
+#     except Exception as e:
+#         return f"Error al actualizar: {e}", 500
+
+
+
+#=======================================================
+# Ruta base agregar Ingredientes de platillos
+#========================================================
 @app.route('/admin/usuario/editar/<id>', methods=['GET'])
 def editar_usuario(id):
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    rol_sesion = session.get('rol')
+    usuario_actual = session.get('usuario_id')
+
     try:
         cursor.execute("SELECT * FROM usuario WHERE id_usuario = :1", [id])
         row = cursor.fetchone()
-        if row:
-            usuario = {
-                'id_usuario': row[0],
-                'rfc': row[1],
-                'curp': row[2],
-                'pass': row[3],
-                'apaterno': row[4],
-                'amaterno': row[5],
-                'nombre': row[6],
-                'calle': row[7],
-                'numero': row[8],
-                'localidad': row[9],
-                'municipio': row[10],
-                'estado': row[11],
-                'c_postal': row[12],
-                'ultimo_acceso': row[13],
-                'estatus': row[14]
-            }
-            return render_template("administrador/editar_usuario.html", usuario=usuario)
-        else:
+
+        if not row:
             return "Usuario no encontrado", 404
+
+        rol_objetivo = row[15]  # columna 16 = rol
+
+        # Reglas de acceso
+        if rol_sesion == 'jefe':
+            pass  
+
+        elif rol_sesion in ['gerente_evento', 'gerente_salon']:
+            if rol_objetivo != 'cliente':
+                flash("Como gerente solo puedes editar clientes.", "warning")
+                return redirect(url_for('listar_usuario'))
+
+        else:
+            flash("Acceso no autorizado.", "danger")
+            return redirect(url_for('index'))
+
+        # Convertimos datos para el formulario
+        usuario = {
+            'id_usuario': row[0],
+            'rfc': row[1],
+            'curp': row[2],
+            'pass': row[3],
+            'apaterno': row[4],
+            'amaterno': row[5],
+            'nombre': row[6],
+            'calle': row[7],
+            'numero': row[8],
+            'localidad': row[9],
+            'municipio': row[10],
+            'estado': row[11],
+            'c_postal': row[12],
+            'ultimo_acceso': row[13],
+            'estatus': row[14]
+        }
+
+        return render_template("administrador/editar_usuario.html", usuario=usuario)
+
     except Exception as e:
         return f"Error: {e}", 500
 
+
 @app.route('/admin/usuario/actualizar/<id>', methods=['POST'])
 def actualizar_usuario(id):
+    if 'usuario_id' not in session:
+        return redirect(url_for('login'))
+
+    rol_sesion = session.get('rol')
+    usuario_actual = session.get('usuario_id')
+
     try:
+        # Validamos a quién se está editando
+        cursor.execute("SELECT rol FROM usuario WHERE id_usuario = :1", [id])
+        target = cursor.fetchone()
+
+        if not target:
+            flash("Usuario objetivo no encontrado.", "danger")
+            return redirect(url_for('listar_usuario'))
+
+        rol_objetivo = target[0]
+
+        if rol_sesion == 'jefe':
+            pass
+        elif rol_sesion in ['gerente_evento', 'gerente_salon']:
+            if rol_objetivo != 'cliente':
+                flash("Como gerente solo puedes editar clientes.", "warning")
+                return redirect(url_for('listar_usuario'))
+
+        else:
+            flash("Acceso denegado.", "danger")
+            return redirect(url_for('index'))
+
+        # Procesar actualización
         datos = (
             request.form['rfc'],
             request.form['curp'],
@@ -334,9 +489,13 @@ def actualizar_usuario(id):
         """
         cursor.execute(sql, datos)
         conn.commit()
+
+        flash("Usuario actualizado correctamente.", "success")
         return redirect(url_for('listar_usuario'))
+
     except Exception as e:
         return f"Error al actualizar: {e}", 500
+
 
 
 #=======================================================
@@ -993,8 +1152,7 @@ def vista_cliente():
     except Exception as e:
         print("Error cliente:", e)
         return "Error cargando proyectos"
-
-
+    
 ##########Vista Gerente
 @app.route('/gerente/dashboard')
 def dashboard_gerente():
@@ -1002,6 +1160,14 @@ def dashboard_gerente():
         return redirect(url_for('login'))
 
     return render_template('gerente/dashboard.html')
+
+###########Vista Administrador (Jefe)
+@app.route('/administrador/dashboard')
+def dashboard_jefe():
+    if session.get('rol') != 'jefe':
+        return redirect(url_for('login'))
+
+    return render_template('administrador/dashboard.html')
 
 
 #========================================================

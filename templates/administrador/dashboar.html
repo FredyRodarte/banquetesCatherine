@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %} Panel del Jefe {% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Bienvenido, {{ session.get('nombre') }}</h2>
+    <p class="text-center">Este es el panel de control completo para el Jefe del sistema.</p>
+
+    <div class="row justify-content-center mt-4">
+        <div class="col-md-5">
+            <a href="{{ url_for('admin_proyectos') }}" class="btn btn-primary w-100 mb-2">
+                📋 Ver Todos los Proyectos
+            </a>
+            <a href="{{ url_for('listar_usuario') }}" class="btn btn-secondary w-100 mb-2">
+                👤 Gestión de Usuarios
+            </a>
+            <a href="{{ url_for('lista_ingredientes') }}" class="btn btn-info w-100 mb-2">
+                🧂 Ver Ingredientes
+            </a>
+            <a href="/admin/gerente_proyecto" class="btn btn-success w-100 mb-2">
+                🧑‍💼 Gerentes de Proyecto
+            </a>
+            <a href="/admin/gerente_salon" class="btn btn-success w-100 mb-2">
+                🏛️ Gerentes de Salón
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
