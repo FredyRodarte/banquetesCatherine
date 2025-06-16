@@ -1530,7 +1530,7 @@ def banquetes_public():
 def complementos_public():
     try:
         cursor.execute("""
-            SELECT ID_COMPLEMENTO, NOMBRE_COMPLEMENTO, UNIDAD_MEDIDA, PRESENTACION, CANTIDAD
+            SELECT ID_COMPLEMENTO, NOMBRE_COMPLEMENTO, UNIDAD_MEDIDA, PRESENTACION, CANTIDAD, PRECIO
             FROM COMPLEMENTO
         """)
         resultados = cursor.fetchall()
@@ -1546,9 +1546,11 @@ def complementos_public():
                 'unidad': row[2],
                 'presentacion': row[3],
                 'cantidad': row[4],
+                'precio': row[5],
                 'imagen': imagen_nombre
             })
 
+        print("complementos:", complementos)
         return render_template('publicos/complementos_cliente.html', complementos=complementos)
 
     except Exception as e:

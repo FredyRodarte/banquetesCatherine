@@ -20,61 +20,41 @@
         </div>
         {% endfor %} -->
 
-            <!-- Complemento 1 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm">
-                <img src="{{ url_for('static', filename='img/Complementos/Fotografía.jpeg') }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Fotografía">
-                <div class="card-body">
-                    <h5 class="card-title">Cabina / Espejo</h5>
-                    <p class="card-text"><strong>Unidad:</strong> Servicio</p>
-                    <p class="card-text"><strong>Presentación:</strong> Paquete profesional</p>
-                    <p class="card-text"><strong>Cantidad:</strong> 1</p>
-                    <p class="card-text"><strong>Precio:</strong> $ 4,000.00</p>
-                </div>
-            </div>
-        </div>
+        <!--Mensajes-->
+        {% with mensajes = get_flashed_messages(with_categories=true) %}
+            {% if mensajes %}
+                {% for categoria, mensaje in mensajes %}
+                    <div class="alert alert-{{ categoria }} alert-dismissible fade show" role="alert">
+                        {{ mensaje }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <!--Fin mensajes-->
 
-        <!-- Complemento 2 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm">
-                <img src="{{ url_for('static', filename='img/Complementos/Música.jpeg') }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Música">
-                <div class="card-body">
-                    <h5 class="card-title">Música</h5>
-                    <p class="card-text"><strong>Unidad:</strong> Hora</p>
-                    <p class="card-text"><strong>Presentación:</strong> DJ profesional</p>
-                    <p class="card-text"><strong>Cantidad:</strong> 3</p>
-                    <p class="card-text"><strong>Precio:</strong> $ 2,000.00</p>
+        <!-- Complemento 1 -->
+        {% if complementos is defined and complementos %}
+            {% for complemento in complementos %}
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm">
+                        <img src="{{ url_for('static', filename='img/Complementos/' + complemento.imagen) }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Fotografía">
+                        <div class="card-body">
+                        <h5 class="card-title">{{complemento.nombre}}</h5>
+                        <p class="card-text"><strong>Unidad:</strong> {{complemento.unidad}}</p>
+                        <p class="card-text"><strong>Presentación:</strong> {{complemento.presentacion}}</p>
+                        <p class="card-text"><strong>Cantidad:</strong>{{complemento.cantidad}}</p>
+                        <p class="card-text"><strong>Precio:</strong> $ {{complemento.precio}}</p>
+                        </div>
+                    </div>
                 </div>
+            {% endfor %}
+        {%else%}
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <p> ❌No se pudieron cargar los complementos</p>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
             </div>
-        </div>
-
-        <!-- Complemento 3 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm">
-                <img src="{{ url_for('static', filename='img/Complementos/Inflables.jpeg') }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Inflables">
-                <div class="card-body">
-                    <h5 class="card-title">Inflables</h5>
-                    <p class="card-text"><strong>Unidad:</strong> Pieza</p>
-                    <p class="card-text"><strong>Presentación:</strong> Castillo infantil</p>
-                    <p class="card-text"><strong>Cantidad:</strong> 2</p>
-                    <p class="card-text"><strong>Precio:</strong> $ 2,500.00</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Complemento 4 -->
-        <div class="col-md-6 col-lg-4">
-            <div class="card h-100 shadow-sm">
-                <img src="{{ url_for('static', filename='img/Complementos/Stands.jpeg') }}" class="card-img-top" style="height: 200px; object-fit: cover;" alt="Stands">
-                <div class="card-body">
-                    <h5 class="card-title">Stands</h5>
-                    <p class="card-text"><strong>Unidad:</strong> Módulo</p>
-                    <p class="card-text"><strong>Presentación:</strong> Personalizado para expos</p>
-                    <p class="card-text"><strong>Cantidad:</strong> 5</p>
-                    <p class="card-text"><strong>Precio:</strong> $ 10,000.00</p>
-                </div>
-            </div>
-        </div>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
