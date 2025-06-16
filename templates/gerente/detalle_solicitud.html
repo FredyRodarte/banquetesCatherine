@@ -17,8 +17,8 @@
             {% if solicitud.comprobante == 'pendiente' %}
                 <span class="text-muted">Pendiente</span>
             {% else %}
-                <a href="{{ url_for('static', filename='comprobantes/' + solicitud.comprobante) }}" target="_blank">
-                    <img src="{{ url_for('static', filename='comprobantes/' + solicitud.comprobante) }}"
+                <a href="{{ url_for('static', filename='comprobantes/' ~ solicitud.comprobante) }}" target="_blank">
+                    <img src="{{ url_for('static', filename='comprobantes/' ~ solicitud.comprobante) }}"
                          alt="Comprobante" class="img-fluid rounded" style="max-height: 300px;">
                 </a>
             {% endif %}
@@ -26,9 +26,9 @@
     </ul>
 
     <a href="{{ url_for('ver_solicitudes') }}" class="btn btn-secondary">← Volver</a>
+    <a href="{{ url_for('aprobar_solicitud', id=solicitud.id_solicitud) }}" class="btn btn-success">Aprobar</a>
     <a href="{{ url_for('form_aprobar_solicitud', id=solicitud.id_solicitud) }}" class="btn btn-success">Aprobar</a>
-    <form action="{{ url_for('rechazar_solicitud', id=solicitud.id_solicitud) }}" method="POST" class="d-inline" onsubmit="return confirm('¿Rechazar esta solicitud?');">
-        <button class="btn btn-danger">Rechazar</button>
-    </form>
+
+
 </div>
 {% endblock %}
