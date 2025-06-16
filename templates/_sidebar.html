@@ -80,6 +80,11 @@
         <li class="nav-item">
           <a class="nav-link" href="/admin/gerente_salon">🧑‍💼 Gerente Salón</a>
         </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('ver_solicitudes') }}">
+                📩 Solicitudes de Reservación
+            </a>
+        </li>
         {% endif %} {% if session.get('rol') == 'jefe' %}
 
         <li class="nav-item">
