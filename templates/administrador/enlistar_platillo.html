@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+
+{% block title %} Platillos Populares {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Reporte de Platillos Populares</h2>
+        <a href="{{ url_for('platillos') }}" class="btn btn-secondary">
+            <i class="fa-solid fa-arrow-left me-1"></i> Volver a Platillos
+        </a>
+    </div>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% if mensajes %}
+            {% for categoria, mensaje in mensajes %}
+                <div class="alert alert-{{ categoria }} alert-dismissible fade show" role="alert">
+                    {{ mensaje }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Cerrar"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="row">
+        <!-- Platillos más populares -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fa-solid fa-trophy me-2"></i> Platillos Más Populares
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if populares %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Platillo</th>
+                                    <th>Veces solicitado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for platillo in populares %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ platillo.nombre }}</td>
+                                    <td>{{ platillo.total }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No hay datos de platillos populares</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Platillos menos populares -->
+        <div class="col-md-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-warning text-dark">
+                    <h5 class="mb-0">
+                        <i class="fa-solid fa-exclamation-circle me-2"></i> Platillos Menos Populares
+                    </h5>
+                </div>
+                <div class="card-body">
+                    {% if menos_populares %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Platillo</th>
+                                    <th>Veces solicitado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for platillo in menos_populares %}
+                                <tr>
+                                    <td>{{ loop.index }}</td>
+                                    <td>{{ platillo.nombre }}</td>
+                                    <td>{{ platillo.total }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-info">No hay datos de platillos menos populares</div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Gráfico de popularidad -->
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0">
+                <i class="fa-solid fa-chart-bar me-2"></i> Resumen de Popularidad
+            </h5>
+        </div>
+        <div class="card-body">
+            <canvas id="popularidadChart" height="100"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Script para gráfico -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('popularidadChart').getContext('2d');
+    
+    // Datos para el gráfico (simplificado)
+    const nombres = {{ populares|map(attribute='nombre')|list|tojson }};
+    const totales = {{ populares|map(attribute='total')|list|tojson }};
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: nombres,
+            datasets: [{
+                label: 'Veces solicitado',
+                data: totales,
+                backgroundColor: 'rgba(54, 162, 235, 0.7)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

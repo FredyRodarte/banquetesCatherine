@@ -4,6 +4,10 @@ from xhtml2pdf import pisa
 from io import BytesIO
 import cx_Oracle
 import re
+from flask import render_template
+import os
+from werkzeug.utils import secure_filename
+
 import pandas as pd
 
 dsn = cx_Oracle.makedsn("localhost", 1521, service_name="xe") 
@@ -916,6 +920,192 @@ def nuevo_salon():
 # Ruta para mostrar Paquetes
 #========================================================
 
+# Rutas para Platillos Michi
+# --- Rutas para Platillos 
+@app.route('/admin/platillos')  # Asegúrate que coincida exactamente
+def platillos():
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        cursor.execute("SELECT ID_PLATILLO, NOMBRE_PLATILLO, PORCIONES, DIFICULTAD FROM PLATILLO")
+        platillos = []
+        for row in cursor:
+            platillos.append({
+                'id': row[0],
+                'nombre': row[1],
+                'porciones': row[2],
+                'dificultad': row[3]
+            })
+        return render_template('administrador/platillos.html', platillos=platillos)  # Asegúrate del return
+    except Exception as e:
+        flash(f"Error: {str(e)}", "danger")
+        return redirect(url_for('index'))  # Siempre retorna algo
+    finally:
+        cursor.close()
+        conexion.close()
+    
+
+@app.route('/admin/platillos/nuevo', methods=['GET'])
+def nuevo_platillo():
+    return render_template('administrador/nuevo_platillo.html')
+
+@app.route('/admin/platillos/guardar', methods=['POST'])
+def guardar_platillo():
+    try:
+        # Validar datos del formulario
+        nombre = request.form.get('nombre', '').strip()
+        porciones = request.form.get('porciones', '').strip()
+        dificultad = request.form.get('dificultad', '').strip()
+
+        if not nombre or not porciones or not dificultad:
+            flash('⚠️ Todos los campos son requeridos', 'warning')
+            return redirect(url_for('nuevo_platillo'))
+
+        try:
+            porciones = int(porciones)  # Validar que porciones sea número
+        except ValueError:
+            flash('⚠️ Las porciones deben ser un número entero', 'warning')
+            return redirect(url_for('nuevo_platillo'))
+
+        # Conexión a la base de datos
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+
+        # Insertar usando la secuencia correcta SQ_ID_PLATILLO
+        cursor.execute("""
+            INSERT INTO BANQUETES.PLATILLO (
+                ID_PLATILLO, 
+                NOMBRE_PLATILLO, 
+                PORCIONES, 
+                DIFICULTAD
+            ) VALUES (
+                SQ_ID_PLATILLO.NEXTVAL, 
+                :1, 
+                :2, 
+                :3
+            )
+        """, (nombre, porciones, dificultad))
+
+        conexion.commit()
+        flash('✅ Platillo creado exitosamente', 'success')
+        return redirect(url_for('platillos'))
+
+    except cx_Oracle.DatabaseError as error:
+        error_obj, = error.args
+        if error_obj.code == 2289:  # Código para "secuencia no existe"
+            flash('⚠️ Error: Problema con la secuencia de platillos', 'danger')
+        else:
+            flash(f'⚠️ Error de base de datos: {error_obj.message}', 'danger')
+        return redirect(url_for('nuevo_platillo'))
+
+    except Exception as e:
+        flash(f'⚠️ Error inesperado: {str(e)}', 'danger')
+        return redirect(url_for('nuevo_platillo'))
+
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conexion' in locals():
+            conexion.close()
+
+@app.route('/admin/platillos/editar/<int:id>', methods=['GET'])
+def editar_platillo(id):
+    # Implementación para editar platillo
+    pass
+
+@app.route('/admin/platillos/actualizar/<int:id>', methods=['POST'])
+def actualizar_platillo(id):
+    # Implementación para actualizar platillo
+    pass
+
+
+@app.route('/admin/platillos/populares')
+def platillos_populares():
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+        
+        # Consulta para platillos más populares
+        cursor.execute("""
+            SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
+            FROM PLATILLO p
+            LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
+            LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
+            LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
+            GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
+            ORDER BY total DESC
+        """)
+        
+        populares = []
+        for row in cursor:
+            populares.append({
+                'id': row[0],
+                'nombre': row[1],
+                'total': row[2]
+            })
+        
+        # Consulta para platillos menos populares
+        cursor.execute("""
+            SELECT p.ID_PLATILLO, p.NOMBRE_PLATILLO, COUNT(pp.ID_PLATILLO) as total
+            FROM PLATILLO p
+            LEFT JOIN PLATILLO_PAQUETE pp ON p.ID_PLATILLO = pp.ID_PLATILLO
+            LEFT JOIN PAQUETE pq ON pp.ID_PAQUETE = pq.ID_PAQUETE
+            LEFT JOIN PROYECTO pr ON pq.ID_PAQUETE = pr.ID_PAQUETE
+            GROUP BY p.ID_PLATILLO, p.NOMBRE_PLATILLO
+            ORDER BY total ASC
+        """)
+        
+        menos_populares = []
+        for row in cursor:
+            menos_populares.append({
+                'id': row[0],
+                'nombre': row[1],
+                'total': row[2]
+            })
+        
+        return render_template('administrador/enlistar_platillos.html',
+                             populares=populares,
+                             menos_populares=menos_populares)
+        
+    except cx_Oracle.Error as error:
+        flash(f'Error al cargar platillos populares: {error}', 'danger')
+        return redirect(url_for('platillos'))
+    finally:
+        cursor.close()
+        conexion.close()
+
+# --- Rutas para Instrucciones 
+@app.route('/admin/platillos/<int:id>/instrucciones')
+def ver_instrucciones(id):
+    # Tu implementación actual
+    pass
+
+@app.route('/admin/platillos/<int:id_platillo>/instrucciones/nueva', methods=['GET'])
+def agregar_instruccion(id_platillo):
+    return render_template('administrador/nueva_instruccion.html', 
+                         platillo={'id': id_platillo, 'nombre': "Nombre del Platillo"})
+
+@app.route('/admin/platillos/<int:id_platillo>/instrucciones/guardar', methods=['POST'])
+def guardar_instruccion(id_platillo):
+    # Implementación para guardar nueva instrucción
+    pass
+
+@app.route('/admin/instrucciones/editar/<int:id>', methods=['GET'])
+def editar_instruccion(id):
+    # Implementación para editar instrucción
+    pass
+
+@app.route('/admin/instrucciones/actualizar/<int:id>', methods=['POST'])
+def actualizar_instruccion(id):
+    # Implementación para actualizar instrucción
+    pass
+
+@app.route('/admin/instrucciones/eliminar/<int:id>', methods=['POST'])
+def eliminar_instruccion(id):
+    # Implementación para eliminar instrucción
+    pass
+
+
 @app.route('/admin/paquetes')
 def admin_paquetes():
     try:
@@ -956,7 +1146,7 @@ def admin_paquetes():
 def generar_id_gerente():
     conexion = get_db_connection()
     cursor = conexion.cursor()
-    cursor.execute("SELECT MAX(ID_GERENTE) FROM GERENTE_SALON")
+    cursor.execute("SELECT MAX(ID_GERENTE_S) FROM GERENTE_SALON")
     resultado = cursor.fetchone()
     cursor.close()
     conexion.close()
@@ -977,14 +1167,14 @@ def gerente_salon():
         conexion = get_db_connection()
         cursor = conexion.cursor()
         cursor.execute("""
-            SELECT ID_GERENTE, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL
-            FROM GERENTE_SALON ORDER BY ID_GERENTE
+            SELECT ID_GERENTE_S, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL
+            FROM GERENTE_SALON ORDER BY ID_GERENTE_S
         """)
         rows = cursor.fetchall()
         gerentes = []
         for r in rows:
             gerentes.append({
-                'id_gerente': r[0],
+                'id_gerente_s': r[0],
                 'apaterno': r[1],
                 'amaterno': r[2],
                 'nombre': r[3],
@@ -1013,15 +1203,15 @@ def nuevo_gerente_salon():
 
         try:
             
-            id_gerente = generar_id_gerente()  # Generar nuevo ID único
+            id_gerente_s = generar_id_gerente()  # Generar nuevo ID único
 
             conexion = get_db_connection()
             cursor = conexion.cursor()
-            print (id_gerente, apaterno, amaterno, nombre, telefono, email)
+            print (id_gerente_s, apaterno, amaterno, nombre, telefono, email)
             cursor.execute("""
                 INSERT INTO GERENTE_SALON (ID_GERENTE, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL)
                 VALUES (:1, :2, :3, :4, :5, :6)
-            """, (id_gerente, apaterno, amaterno, nombre, telefono, email))
+            """, (id_gerente_s, apaterno, amaterno, nombre, telefono, email))
             
             conexion.commit()
         
@@ -1044,7 +1234,7 @@ def nuevo_gerente_salon():
 #========================================================
 @app.route('/admin/actualizar_gerente', methods=['POST'])
 def actualizar_gerente():
-    id_gerente = request.form.get('id_gerente')
+    id_gerente_s = request.form.get('id_gerente')
     apaterno = request.form.get('apaterno')
     amaterno = request.form.get('amaterno')
     nombre = request.form.get('nombre')
@@ -1061,8 +1251,8 @@ def actualizar_gerente():
                 NOMBRE = :3,
                 TELEFONO = :4,
                 EMAIL = :5
-            WHERE ID_GERENTE = :6
-        """, (apaterno, amaterno, nombre, telefono, email, id_gerente))
+            WHERE ID_GERENTE_s = :6
+        """, (apaterno, amaterno, nombre, telefono, email, id_gerente_s))
         conexion.commit()
         cursor.close()
         conexion.close()
@@ -1202,7 +1392,141 @@ def obtener_complementos():
     return [{'id': r[0], 'nombre': r[1]} for r in resultados]
     #return [{'id': row[0], 'nombre': row[1], 'precio': row[2]} for row in  cursor.fetchall()]
 
-    
+#========================================================
+# Ruta para reservar
+#========================================================
+UPLOAD_FOLDER = 'static/comprobantes/'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+@app.route('/reservar', methods=['GET', 'POST'])
+def reservar():
+    if request.method == 'POST':
+        campos = ['rfc', 'curp', 'apaterno', 'amaterno', 'nombre', 'calle',
+                  'numero', 'localidad', 'municipio', 'estado', 'c_postal',
+                  'tipo_paquete', 'tipo_anticipo']
+        datos = [request.form.get(c) for c in campos]
+
+        tipo_anticipo = request.form.get('tipo_anticipo')
+        comprobante_archivo = request.files.get('comprobante')
+        comprobante_nombre = 'pendiente'
+
+        if tipo_anticipo == 'transferencia' and comprobante_archivo:
+            comprobante_nombre = secure_filename(comprobante_archivo.filename)
+            ruta = os.path.join(UPLOAD_FOLDER, comprobante_nombre)
+            comprobante_archivo.save(ruta)
+
+        try:
+            cursor.execute("""
+                INSERT INTO solicitud_reservacion (
+                    rfc, curp, apaterno, amaterno, nombre, calle, numero,
+                    localidad, municipio, estado, c_postal,
+                    tipo_paquete, tipo_anticipo, comprobante
+                ) VALUES (
+                    :1, :2, :3, :4, :5, :6, :7, :8, :9, :10, :11, :12,
+                    :13, :14
+                )
+            """, datos + [comprobante_nombre])
+            conn.commit()
+            flash("Solicitud registrada correctamente.", "success")
+            return redirect(url_for('reservar'))
+        except Exception as e:
+            return f"Error al guardar solicitud: {e}", 500
+
+    return render_template('/publicos/reservar.html')
+
+#=======================================================
+# Ruta para Gerente apruebe solicitud
+#========================================================
+
+
+@app.route('/gerente/solicitudes')
+def ver_solicitudes():
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("""
+        SELECT id_solicitud, rfc, curp, apaterno, amaterno, nombre, calle, numero,
+               localidad, municipio, estado, c_postal, tipo_paquete, tipo_anticipo, comprobante
+        FROM solicitud_reservacion
+        WHERE revisado = 0
+    """)
+    rows = cursor.fetchall()
+
+    solicitudes = []
+    for row in rows:
+        solicitudes.append({
+            'id': row[0],
+            'rfc': row[1],
+            'curp': row[2],
+            'apaterno': row[3],
+            'amaterno': row[4],
+            'nombre': row[5],
+            'calle': row[6],
+            'numero': row[7],
+            'localidad': row[8],
+            'municipio': row[9],
+            'estado': row[10],
+            'c_postal': row[11],
+            'tipo_paquete': row[12],
+            'tipo_anticipo': row[13],
+            'comprobante': row[14]
+        })
+
+    return render_template("gerente/solicitudes.html", solicitudes=solicitudes)
+
+
+
+@app.route('/gerente/solicitud/aprobar/<int:id>', methods=['POST'])
+def aprobar_solicitud(id):
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("SELECT * FROM solicitud_reservacion WHERE id_solicitud = :1", [id])
+    row = cursor.fetchone()
+
+    if not row:
+        flash("Solicitud no encontrada.", "danger")
+        return redirect(url_for('ver_solicitudes'))
+
+    try:
+        cursor.execute("""
+            INSERT INTO usuario (
+                id_usuario, rfc, curp, pass, apaterno, amaterno, nombre,
+                calle, numero, localidad, municipio, estado, c_postal,
+                ultimo_acceso, estatus, rol
+            ) VALUES (
+                :1, :2, :3, :4, :5, :6, :7,
+                :8, :9, :10, :11, :12, :13,
+                SYSDATE, 1, 'cliente'
+            )
+        """, [
+            f"CL-{id:04}", row[1], row[2], password, row[3], row[4], row[5], row[6],
+            row[7], row[8], row[9], row[10], row[11], row[12]
+        ])
+        cursor.execute("UPDATE solicitud_reservacion SET revisado = 1 WHERE id_solicitud = :1", [id])
+        conn.commit()
+        flash("Cliente creado correctamente.", "success")
+    except Exception as e:
+        return f"Error al aprobar solicitud: {e}", 500
+
+    return redirect(url_for('ver_solicitudes'))
+
+
+@app.route('/gerente/solicitud/rechazar/<int:id>', methods=['POST'])
+def rechazar_solicitud(id):
+    if session.get('rol') not in ['gerente_evento', 'gerente_salon']:
+        return redirect(url_for('login'))
+
+    cursor.execute("UPDATE solicitud_reservacion SET revisado = 1 WHERE id_solicitud = :1", [id])
+    conn.commit()
+    flash("Solicitud rechazada.", "info")
+    return redirect(url_for('ver_solicitudes'))
+
+
+
+
+
+
 
 
 #=======================================================

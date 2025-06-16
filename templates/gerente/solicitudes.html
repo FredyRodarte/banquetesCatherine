@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+{% block title %} Solicitudes de Reservación {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="text-center mb-4">Solicitudes de Reservación Pendientes</h2>
+
+    {% if solicitudes %}
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Nombre</th>
+                        <th>Dirección</th>
+                        <th>Tipo</th>
+                        <th>Anticipo</th>
+                        <th>Comprobante</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in solicitudes %}
+                    <tr>
+                        <td>{{ s.nombre }} {{ s.apaterno }} {{ s.amaterno }}</td>
+                        <td>{{ s.calle }} #{{ s.numero }}, {{ s.localidad }}, {{ s.municipio }}, {{ s.estado }}</td>
+                        <td>{{ s.tipo_paquete|capitalize }}</td>
+                        <td>{{ s.tipo_anticipo|capitalize }}</td>
+                        <td>
+                            {% if s.comprobante == 'pendiente' %}
+                                <span class="text-muted">Pendiente</span>
+                            {% else %}
+                                <a href="{{ url_for('static', filename='comprobantes/' + s.comprobante) }}" target="_blank">
+                                    Ver Imagen
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <form action="{{ url_for('aprobar_solicitud', id=s.id) }}" method="POST" class="d-inline">
+                                <button class="btn btn-success btn-sm">Aprobar</button>
+                            </form>
+                            <form action="{{ url_for('rechazar_solicitud', id=s.id) }}" method="POST" class="d-inline" 
+                                  onsubmit="return confirm('¿Seguro que quieres rechazar esta solicitud?');">
+                                <button class="btn btn-danger btn-sm">Rechazar</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <p class="text-center">No hay solicitudes pendientes.</p>
+    {% endif %}
+</div>
+{% endblock %}

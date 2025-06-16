@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}Reservación{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center mb-4">Formulario de Reservación</h2>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+        {% if mensajes %}
+            {% for categoria, mensaje in mensajes %}
+                <div class="alert alert-{{ categoria }}">{{ mensaje }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" enctype="multipart/form-data" class="mx-auto" style="max-width: 700px;">
+        <div class="row">
+            <!-- Todos los campos estándar del usuario -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">RFC</label>
+                <input type="text" name="rfc" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">CURP</label>
+                <input type="text" name="curp" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Nombre</label>
+                <input type="text" name="nombre" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Apellido Paterno</label>
+                <input type="text" name="apaterno" class="form-control" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Apellido Materno</label>
+                <input type="text" name="amaterno" class="form-control" required>
+            </div>
+            <div class="col-md-8 mb-3">
+                <label class="form-label">Calle</label>
+                <input type="text" name="calle" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Número</label>
+                <input type="text" name="numero" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Localidad</label>
+                <input type="text" name="localidad" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Municipio</label>
+                <input type="text" name="municipio" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Estado</label>
+                <input type="text" name="estado" class="form-control" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label class="form-label">Código Postal</label>
+                <input type="text" name="c_postal" class="form-control" required>
+            </div>
+
+            <!-- Tipo de paquete -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Tipo de Paquete</label>
+                <select name="tipo_paquete" class="form-select" required>
+                    <option value="" disabled selected>Seleccione uno</option>
+                    <option value="evento">Banquete para Evento</option>
+                    <option value="salon">Reservación de Salón</option>
+                </select>
+            </div>
+
+            <!-- Tipo de anticipo -->
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Tipo de Anticipo</label>
+                <select name="tipo_anticipo" id="tipo_anticipo" class="form-select" onchange="toggleComprobante()" required>
+                    <option value="" disabled selected>Seleccione uno</option>
+                    <option value="transferencia">Transferencia</option>
+                    <option value="efectivo">Efectivo</option>
+                </select>
+            </div>
+
+            <!-- Comprobante (solo si transferencia) -->
+            <div class="col-md-12 mb-3" id="comprobante_field" style="display:none;">
+                <label class="form-label">Comprobante de Anticipo (Imagen)</label>
+                <input type="file" class="form-control" name="comprobante" accept="image/*">
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100 mt-3">Enviar Solicitud</button>
+    </form>
+</div>
+
+<script>
+function toggleComprobante() {
+    const tipo = document.getElementById('tipo_anticipo').value;
+    document.getElementById('comprobante_field').style.display = (tipo === 'transferencia') ? 'block' : 'none';
+}
+</script>
+{% endblock %}
