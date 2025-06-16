@@ -775,8 +775,62 @@ def nuevo_platillo():
 
 @app.route('/admin/platillos/guardar', methods=['POST'])
 def guardar_platillo():
-    # Implementación para guardar nuevo platillo
-    pass
+    try:
+        # Validar datos del formulario
+        nombre = request.form.get('nombre', '').strip()
+        porciones = request.form.get('porciones', '').strip()
+        dificultad = request.form.get('dificultad', '').strip()
+
+        if not nombre or not porciones or not dificultad:
+            flash('⚠️ Todos los campos son requeridos', 'warning')
+            return redirect(url_for('nuevo_platillo'))
+
+        try:
+            porciones = int(porciones)  # Validar que porciones sea número
+        except ValueError:
+            flash('⚠️ Las porciones deben ser un número entero', 'warning')
+            return redirect(url_for('nuevo_platillo'))
+
+        # Conexión a la base de datos
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+
+        # Insertar usando la secuencia correcta SQ_ID_PLATILLO
+        cursor.execute("""
+            INSERT INTO BANQUETES.PLATILLO (
+                ID_PLATILLO, 
+                NOMBRE_PLATILLO, 
+                PORCIONES, 
+                DIFICULTAD
+            ) VALUES (
+                SQ_ID_PLATILLO.NEXTVAL, 
+                :1, 
+                :2, 
+                :3
+            )
+        """, (nombre, porciones, dificultad))
+
+        conexion.commit()
+        flash('✅ Platillo creado exitosamente', 'success')
+        return redirect(url_for('platillos'))
+
+    except cx_Oracle.DatabaseError as error:
+        error_obj, = error.args
+        if error_obj.code == 2289:  # Código para "secuencia no existe"
+            flash('⚠️ Error: Problema con la secuencia de platillos', 'danger')
+        else:
+            flash(f'⚠️ Error de base de datos: {error_obj.message}', 'danger')
+        return redirect(url_for('nuevo_platillo'))
+
+    except Exception as e:
+        flash(f'⚠️ Error inesperado: {str(e)}', 'danger')
+        return redirect(url_for('nuevo_platillo'))
+
+    finally:
+        if 'cursor' in locals():
+            cursor.close()
+        if 'conexion' in locals():
+            conexion.close()
 
 @app.route('/admin/platillos/editar/<int:id>', methods=['GET'])
 def editar_platillo(id):
