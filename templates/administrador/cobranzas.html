@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Reporte de Cobranzas{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">Reporte de Cobranzas</h2>
+
+    <table class="table table-bordered table-hover">
+        <thead class="table-secondary">
+            <tr>
+                <th>ID Proyecto</th>
+                <th>Fecha Evento</th>
+                <th>Anticipo</th>
+                <th>Nombre</th>
+                <th>Apellido Paterno</th>
+                <th>Apellido Materno</th>
+                <th>Estatus</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in cobranzas %}
+            <tr>
+                <td>{{ c.id_proyecto }}</td>
+                <td>{{ c.fecha_evento }}</td>
+                <td>${{ c.anticipo }}</td>
+                <td>{{ c.nombre }}</td>
+                <td>{{ c.apaterno }}</td>
+                <td>{{ c.amaterno }}</td>
+                <td>{{ c.estatus }}</td>
+                <td>
+                    <button class="btn btn-success btn-sm" disabled>Pagar</button>
+                    <!-- Disabled, sin funcionalidad -->
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <div class="text-center mt-5">
+        <a href="/" class="btn btn-primary btn-lg">Volver a Inicio</a>
+    </div>
+</div>
+{% endblock %}
+
