@@ -102,35 +102,71 @@
     <div class="card">
         <div class="card-header bg-primary text-white">
             <h4 class="mb-0">Configuración de Paquetes</h4>
+    </div>
+    <div class="card-body">
+        <!-- Tu contenido existente de paquetes aquí -->
+        <div class="mb-3">
+            <h5>Platillos Disponibles</h5>
+            <ul class="list-group">
+                {% for platillo in platillos %}
+                <li class="list-group-item">{{ platillo.nombre_platillo }}</li>
+                {% endfor %}
+            </ul>
         </div>
-        <div class="card-body">
-            <!-- Tu contenido existente de paquetes aquí -->
-            <div class="mb-3">
-                <h5>Platillos Disponibles</h5>
-                <ul class="list-group">
-                    {% for platillo in platillos %}
-                    <li class="list-group-item">{{ platillo.nombre_platillo }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
 
-            <div class="mb-3">
-                <h5>Complementos Disponibles</h5>
-                <ul class="list-group">
-                    {% for complemento in complementos %}
-                    <li class="list-group-item">{{ complemento.nombre_complemento }}</li>
-                    {% endfor %}
-                </ul>
+        <div class="mb-3">
+            <h5>Complementos Disponibles</h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Medida</th>
+                            <th>Presentación</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for complemento in complementos %}
+                        <tr>
+                            <td>{{ complemento.id_complemento }}</td>
+                            <td>{{ complemento.nombre }}</td>
+                            <td>{{ complemento.medida }}</td>
+                            <td>{{ complemento.presentacion }}</td>
+                            <td>{{ complemento.cantidad }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+        </div>
 
-            <div class="mb-3">
-                <h5>Salones Disponibles</h5>
-                <ul class="list-group">
-                    {% for salon in salones %}
-                    <li class="list-group-item">{{ salon.nombre_salon }} (Capacidad: {{ salon.capacidad }})</li>
-                    {% endfor %}
-                </ul>
+        <div class="mb-3">
+            <h5>Salones Disponibles</h5>
+            <div class="table-responsive">
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Capacidad</th>
+                            <th>Ubicación</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for salon in salones %}
+                        <tr>
+                            <td>{{ salon.id }}</td>
+                            <td>{{ salon.nombre }}</td>
+                            <td>{{ salon.capacidad }}</td>
+                            <td>{{ salon.ubicacion }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
+        </div>
         </div>
     </div>
 </div>
