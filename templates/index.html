@@ -241,37 +241,69 @@
                 <!-- Salón -->
                 <div class="col-md-4">
                     <label for="salon" class="form-label">Salón</label>
-                    <select class="form-select" name="salon_id" required>
+                    <select class="form-select" name="id_salon" required>
                         <option value="">Selecciona un salón</option>
                         {% for salon in salones %}
-                            <option value="{{ salon.id }}">{{ salon.nombre }}</option>
-                            <!-- <option value="{{ salon.id }}">{{ salon.nombre }} (${{ salon.precio }})</option> -->
+                            <option value="{{ salon.id }}" data-precio="{{ salon.precio }}"
+                            {% if seleccionado and salon.id == seleccionado.id_salon %}selected{% endif %}>
+                            {{ salon.nombre }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 <!-- Platillo -->
                 <div class="col-md-4">
                     <label for="platillo" class="form-label">Platillo</label>
-                    <select class="form-select" name="platillo_id" required>
+                    <select class="form-select" name="id_platillo" required>
                         <option value="">Selecciona un platillo</option>
                         {% for platillo in platillos %}
-                            <option value="{{ platillo.id }}">{{ platillo.nombre }} </option>
-                            <!-- <option value="{{ platillo.id }}">{{ platillo.nombre }} (${{ platillo.precio }})</option> -->
+                            <option value="{{ platillo.id }}" data-precio="{{ platillo.precio }}"
+                            {% if seleccionado and platillo.id == seleccionado.id_platillo %}selected{% endif %}>
+                                {{ platillo.nombre }}
+                            </option>
                         {% endfor %}
                     </select>
+
                 </div>
                 <!-- Complemento -->
                 <div class="col-md-4">
                     <label for="complemento" class="form-label">Complemento</label>
-                    <select class="form-select" name="complemento_id" required>
+                    <select class="form-select" name="id_complemento" required>
                         <option value="">Selecciona un complemento</option>
                         {% for complemento in complementos %}
-                            <option value="{{ complemento.id }}">{{ complemento.nombre }}</option>
-                            <!-- <option value="{{ complemento.id }}">{{ complemento.nombre }} (${{ complemento.precio }})</option> -->
+                            <option value="{{ complemento.id }}" data-precio="{{ complemento.precio }}"
+                            {% if seleccionado and complemento.id == seleccionado.id_complemento %}selected{% endif %}>
+                                {{ complemento.nombre }}
+                            </option>
                         {% endfor %}
                     </select>
+
                 </div>
+                <!-- Número de comensales -->
+                <div class="col-md-4">
+                    <label for="comensales" class="form-label">Número de comensales</label>
+                    <input type="number" name="comensales" id="comensales" class="form-control"
+                        value="{{ seleccionado.comensales if seleccionado else 1 }}" min="1" required>
+                </div>
+
             </div>
+
+            <div class="mt-3">
+                <div class="mt-3">
+                    <p><strong>Precio Salón:</strong> $<span id="precioSalon">
+                        {{ seleccionado.precio_salon if seleccionado else 0 }}
+                    </span></p>
+
+                    <p><strong>Precio Platillo (x Comensales):</strong> $<span id="precioPlatillo">
+                        {{ seleccionado.precio_platillo if seleccionado else 0 }}
+                    </span></p>
+
+                    <p><strong>Precio Complemento (x Comensales):</strong> $<span id="precioComplemento">
+                        {{ seleccionado.precio_complemento if seleccionado else 0 }}
+                    </span></p>
+                </div>
+
+            </div>
+
 
             <div class="text-center mt-4">
                 <button type="submit" class="btn btn-primary btn-lg">Calcular Total</button>
@@ -282,9 +314,61 @@
                 <strong>Total estimado:</strong> ${{ total }}
             </div>
             {% endif %}
+            {% if total %}
+            <div class="text-center mt-4">
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                    <i class="fa-solid fa-rotate-left"></i> Nueva Cotización
+                </a>
+            </div>
+            {% endif %}
+
         </form>
     </div>
 </section>
+
+<!-- Cotizaciones -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const selects = ['id_salon', 'id_platillo', 'id_complemento'];
+        const spans = {
+            id_salon: 'precioSalon',
+            id_platillo: 'precioPlatillo',
+            id_complemento: 'precioComplemento'
+        };
+
+        const comensalesInput = document.getElementById('comensales');
+
+    function actualizarPrecios() {
+        const comensales = parseInt(comensalesInput.value) || 1;
+
+        selects.forEach(function (id) {
+            const select = document.getElementsByName(id)[0];
+            const span = document.getElementById(spans[id]);
+
+            if (select && span) {
+                const precioRaw = select.selectedOptions[0]?.getAttribute('data-precio') || 0;
+                let precio = parseFloat(precioRaw);
+                if (id !== 'id_salon') precio *= comensales;
+                span.textContent = isNaN(precio) ? '0.00' : precio.toFixed(2);
+            }
+        });
+    }
+
+        selects.forEach(function (id) {
+            const select = document.getElementsByName(id)[0];
+            const span = document.getElementById(spans[id]);
+
+            if (select && span) {
+                select.addEventListener('change', function () {
+                    const precioRaw = this.selectedOptions[0].getAttribute('data-precio');
+                    const precio = parseFloat(precioRaw);
+                    span.textContent = isNaN(precio) ? '0.00' : precio.toFixed(2);
+                });
+            }
+        });
+    });
+    </script>
+
 
 
 <!-- Sobre la Chef -->
@@ -360,5 +444,6 @@
         </div>
     </div>
 </section>
-<span>Aqui</span>
+
+
 {% endblock %}

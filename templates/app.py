@@ -1750,8 +1750,8 @@ def cotizar():
                 'id_complemento': int(id_complemento),
                 'comensales': int(request.form['comensales']),
                 'precio_salon': precio_salon,
-                'precio_platillo': precio_platillo_total,
-                'precio_complemento': precio_complemento_total
+                'precio_platillo': precio_platillo * int(request.form['comensales']),
+                'precio_complemento': precio_complemento * int(request.form['comensales'])
             }
         )
 
