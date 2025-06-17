@@ -105,9 +105,8 @@
       <ul class="navbar-nav ms-auto">
         {% if session.get('usuario_id') %}
         <li class="nav-item disabled text-white ps-3">
-          <small
-            >Rol: {{ session.get('rol').replace('_', ' ')|capitalize }}</small
-          >
+          {% set rol = session.get('rol') or 'invitado' %}
+          <small>Rol: {{ rol.replace('_', ' ')|capitalize }}</small>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{{ url_for('logout') }}"
