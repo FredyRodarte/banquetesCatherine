@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %} Editar Complemento - Administrador {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h2 class="mb-3 mb-md-0">Editar Complemento #{{ complemento.id }}</h2>
+    </div>
+
+    <form method="POST" action="{{ url_for('actualizar_complemento') }}" class="row g-3 needs-validation" novalidate>
+        <input type="hidden" name="id_complementoE" value="{{ complemento.id }}">
+        
+        <!-- Nombre -->
+        <div class="col-md-6">
+            <label for="nombreE" class="form-label">Nombre</label>
+            <input type="text" class="form-control" name="nombreE" id="nombreE" 
+                value="{{ complemento.nombre }}" required>
+        </div>
+
+        <!-- Unidad de Medida -->
+        <div class="col-md-6">
+            <label for="medidaE" class="form-label">Unidad de Medida</label>
+            <select name="medidaE" id="medidaE" class="form-select" required>
+                <option value="kg" {% if complemento.medida == 'kg' %}selected{% endif %}>Kilogramos (kg)</option>
+                <option value="g" {% if complemento.medida == 'g' %}selected{% endif %}>Gramos (g)</option>
+                <option value="l" {% if complemento.medida == 'l' %}selected{% endif %}>Litros (l)</option>
+                <option value="ml" {% if complemento.medida == 'ml' %}selected{% endif %}>Mililitros (ml)</option>
+                <option value="pz" {% if complemento.medida == 'pz' %}selected{% endif %}>Piezas (pz)</option>
+            </select>
+        </div>
+
+        <!-- Presentación -->
+        <div class="col-md-6">
+            <label for="presentacionE" class="form-label">Presentación</label>
+            <input type="text" class="form-control" name="presentacionE" id="presentacionE" 
+                value="{{ complemento.presentacion }}" required>
+        </div>
+
+        <!-- Cantidad -->
+        <div class="col-md-3">
+            <label for="cantidadE" class="form-label">Cantidad</label>
+            <input type="number" class="form-control" name="cantidadE" id="cantidadE" 
+                min="0" step="0.01" value="{{ complemento.cantidad }}" required>
+        </div>
+
+        <!-- Precio -->
+        <div class="col-md-3">
+            <label for="precioE" class="form-label">Precio</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" class="form-control" name="precioE" id="precioE" 
+                    min="0" step="0.01" value="{{ complemento.precio }}" required>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="col-12 mt-4">
+            <button class="btn btn-primary" type="submit">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar Cambios
+            </button>
+            <a href="{{ url_for('admin_complementos') }}" class="btn btn-secondary ms-2">
+                <i class="fa-solid fa-times me-1"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

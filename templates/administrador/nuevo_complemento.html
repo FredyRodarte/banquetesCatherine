@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %} Nuevo Complemento - Administrador {% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4">
+        <h2 class="mb-3 mb-md-0">Registrar Nuevo Complemento</h2>
+    </div>
+
+    <form method="POST" action="{{ url_for('registrar_complemento') }}" class="row g-3 needs-validation" novalidate>
+        <!-- Nombre -->
+        <div class="col-md-6">
+            <label for="nombreA" class="form-label">Nombre</label>
+            <input type="text" class="form-control" name="nombreA" id="nombreA" required>
+        </div>
+
+        <!-- Unidad de Medida -->
+        <div class="col-md-6">
+            <label for="medidaA" class="form-label">Unidad de Medida</label>
+            <select name="medidaA" id="medidaA" class="form-select" required>
+                <option value="" selected disabled>Selecciona una unidad</option>
+                <option value="kg">Kilogramos (kg)</option>
+                <option value="g">Gramos (g)</option>
+                <option value="l">Litros (l)</option>
+                <option value="ml">Mililitros (ml)</option>
+                <option value="pz">Piezas (pz)</option>
+            </select>
+        </div>
+
+        <!-- Presentación -->
+        <div class="col-md-6">
+            <label for="presentacionA" class="form-label">Presentación</label>
+            <input type="text" class="form-control" name="presentacionA" id="presentacionA" required>
+        </div>
+
+        <!-- Cantidad -->
+        <div class="col-md-3">
+            <label for="cantidadA" class="form-label">Cantidad</label>
+            <input type="number" class="form-control" name="cantidadA" id="cantidadA" min="0" step="0.01" required>
+        </div>
+
+        <!-- Precio -->
+        <div class="col-md-3">
+            <label for="precioA" class="form-label">Precio</label>
+            <div class="input-group">
+                <span class="input-group-text">$</span>
+                <input type="number" class="form-control" name="precioA" id="precioA" min="0" step="0.01" required>
+            </div>
+        </div>
+
+        <!-- Botones -->
+        <div class="col-12 mt-4">
+            <button class="btn btn-success" type="submit">
+                <i class="fa-solid fa-list-check"></i> Registrar Complemento
+            </button>
+            <a href="{{ url_for('admin_complementos') }}" class="btn btn-secondary ms-2">
+                <i class="fa-solid fa-times me-1"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -462,6 +462,7 @@ def eliminar_proyecto(id_proyecto):
         print(f"Error al eliminar proyecto: {e}")
         flash("⚠️ Error al eliminar el proyecto", "danger")
         return redirect(url_for('admin_proyectos'))
+
 #======================================================
 # Ruta para los complementos
 #======================================================
@@ -478,7 +479,8 @@ def admin_complementos():
             NOMBRE_COMPLEMENTO,
             UNIDAD_MEDIDA,
             PRESENTACION,
-            CANTIDAD
+            CANTIDAD,
+            PRECIO
         FROM BANQUETES.COMPLEMENTO
         ORDER BY ID_COMPLEMENTO
         """
@@ -493,7 +495,8 @@ def admin_complementos():
                 'nombre': row[1],
                 'medida': row[2],
                 'presentacion': row[3],
-                'cantidad': row[4]
+                'cantidad': row[4],
+                'precio': row[5]
             })
 
         #cerrar conexion 
@@ -503,7 +506,155 @@ def admin_complementos():
         return render_template('/administrador/complementos.html', complementos=complementos)
     except Exception as e:
         print("Error al cargar la tabla complementos", e)
+        flash("⚠️ Error al Cargar complementos", "danger")
 
+@app.route('/admin/nuevo_complemento')
+def nuevo_complemento():
+    try:
+        return render_template('/administrador/nuevo_complemento.html')
+    except Exception as e:
+        print("Error al cargar formulario de complemento:", e)
+        flash("⚠️ Error al cargar formulario", "danger")
+        return redirect(url_for('admin_complementos'))
+
+@app.route('/admin/registrar_complemento', methods=['POST'])
+def registrar_complemento():
+    try:
+        # Recuperar datos del formulario
+        nombre = request.form['nombreA']
+        medida = request.form['medidaA']
+        presentacion = request.form['presentacionA']
+        cantidad = request.form['cantidadA']
+        precio = request.form['precioA']
+
+        # Crear conexión a la BD
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
+        query = """
+        INSERT INTO COMPLEMENTO 
+        (ID_COMPLEMENTO, NOMBRE_COMPLEMENTO, UNIDAD_MEDIDA, PRESENTACION, CANTIDAD, PRECIO)
+        VALUES (SQ_ID_COMPLEMENTO.NEXTVAL, :1, :2, :3, :4, :5)
+        """
+        
+        cursor1.execute(query, [nombre, medida, presentacion, cantidad, precio])
+        conexion.commit()
+
+        flash("✅ Complemento registrado exitosamente", "success")
+        return redirect(url_for('admin_complementos'))
+        
+    except Exception as e:
+        print("Error al registrar complemento:", e)
+        flash("⚠️ Error al registrar complemento", "danger")
+        return redirect(url_for('admin_complementos'))
+    finally:
+        if 'cursor1' in locals(): cursor1.close()
+        if 'conexion' in locals(): conexion.close()
+
+@app.route('/admin/editar_complemento/<int:id_complemento>')
+def editar_complemento(id_complemento):
+    try:
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
+        query = """
+        SELECT 
+            ID_COMPLEMENTO, NOMBRE_COMPLEMENTO, UNIDAD_MEDIDA, 
+            PRESENTACION, CANTIDAD, PRECIO
+        FROM BANQUETES.COMPLEMENTO
+        WHERE ID_COMPLEMENTO = :id
+        """
+        
+        cursor1.execute(query, {'id': id_complemento})
+        complemento = cursor1.fetchone()
+
+        if not complemento:
+            flash("⚠️ Complemento no encontrado", "warning")
+            return redirect(url_for('admin_complementos'))
+
+        return render_template('/administrador/editar_complemento.html', 
+                    complemento={
+                        'id': complemento[0],
+                        'nombre': complemento[1],
+                        'medida': complemento[2],
+                        'presentacion': complemento[3],
+                        'cantidad': complemento[4],
+                        'precio': complemento[5]
+                    })
+        
+    except Exception as e:
+        print("Error al cargar complemento para edición:", e)
+        flash("⚠️ Error al cargar complemento", "danger")
+        return redirect(url_for('admin_complementos'))
+    finally:
+        if 'cursor1' in locals(): cursor1.close()
+        if 'conexion' in locals(): conexion.close()
+
+@app.route('/admin/actualizar_complemento', methods=['POST'])
+def actualizar_complemento():
+    try:
+        # Recuperar datos del formulario
+        id_complemento = request.form['id_complementoE']
+        nombre = request.form['nombreE']
+        medida = request.form['medidaE']
+        presentacion = request.form['presentacionE']
+        cantidad = request.form['cantidadE']
+        precio = request.form['precioE']
+
+        # Crear conexión a la BD
+        conexion = get_db_connection()
+        cursor1 = conexion.cursor()
+
+        query = """
+        UPDATE BANQUETES.COMPLEMENTO SET
+            NOMBRE_COMPLEMENTO = :1,
+            UNIDAD_MEDIDA = :2,
+            PRESENTACION = :3,
+            CANTIDAD = :4,
+            PRECIO = :5
+        WHERE ID_COMPLEMENTO = :6
+        """
+        
+        cursor1.execute(query, [nombre, medida, presentacion, cantidad, precio, id_complemento])
+        conexion.commit()
+
+        flash("✅ Complemento actualizado exitosamente", "success")
+        return redirect(url_for('admin_complementos'))
+        
+    except Exception as e:
+        print("Error al actualizar complemento:", e)
+        flash("⚠️ Error al actualizar complemento", "danger")
+        return redirect(url_for('editar_complemento', id_complemento=id_complemento))
+    finally:
+        if 'cursor1' in locals(): cursor1.close()
+        if 'conexion' in locals(): conexion.close()
+
+@app.route('/admin/eliminar_complemento/<int:id_complemento>', methods=['GET'])
+def eliminar_complemento(id_complemento):
+    try:
+        conexion = get_db_connection()
+        cursor = conexion.cursor()
+
+        # Verificar si existe
+        cursor.execute("SELECT COUNT(*) FROM BANQUETES.COMPLEMENTO WHERE ID_COMPLEMENTO = :id", {'id': id_complemento})
+        if cursor.fetchone()[0] == 0:
+            flash("⚠️ Complemento no encontrado", "warning")
+            return redirect(url_for('admin_complementos'))
+
+        # Eliminar
+        cursor.execute("DELETE FROM BANQUETES.COMPLEMENTO WHERE ID_COMPLEMENTO = :id", {'id': id_complemento})
+        conexion.commit()
+
+        flash("✅ Complemento eliminado exitosamente", "success")
+        return redirect(url_for('admin_complementos'))
+        
+    except Exception as e:
+        print("Error al eliminar complemento:", e)
+        flash("⚠️ Error al eliminar complemento", "danger")
+        return redirect(url_for('admin_complementos'))
+    finally:
+        if 'cursor' in locals(): cursor.close()
+        if 'conexion' in locals(): conexion.close()
 
 #=======================================================
 # Ruta base agregar Usuarios(que son los clientes)
