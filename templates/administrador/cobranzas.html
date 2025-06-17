@@ -30,10 +30,21 @@
                 <td>{{ c.amaterno }}</td>
                 <td>{{ c.estatus }}</td>
                 <td>
-                    <button class="btn btn-success btn-sm" disabled>Pagar</button>
-                    <!-- Disabled, sin funcionalidad -->
+                    <button class="btn btn-success btn-sm"
+                            onclick="mostrarAviso('{{ c.nombre }} {{ c.apaterno }}', '{{ c.telefono }}', '{{ c.email }}')">
+                        Cobrar
+                    </button>
                 </td>
             </tr>
+            <script>
+            function mostrarAviso(nombre, telefono, correo) {
+                const mensaje = `📢 Se ha enviado un aviso de cobro:
+
+            Estimado/a ${nombre}, le recordamos que debe pasar a pagar el resto del pedido para evitar su cancelación.`;
+                
+                alert(mensaje);
+            }
+            </script>
             {% endfor %}
         </tbody>
     </table>

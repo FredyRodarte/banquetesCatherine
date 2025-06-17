@@ -261,6 +261,28 @@ def registrar_proyecto():
                                         id_usuario, rfc_usuario, curp_usuario, id_paquete, fecha_oracle, anticipo, estatus])
         conexion.commit()
 
+        # 🔔 Obtener el ID del gerente de salón que administra el salón asignado
+        cursor1.execute("SELECT ID_GERENTE_S FROM SALON WHERE ID_SALON = :1", [id_salon])
+        resultado = cursor1.fetchone()
+        if resultado:
+            id_gerente_s = resultado[0]
+
+            # 🔔 Insertar notificación en NOTIFICACION_GERENTE
+            cursor1.execute("""
+                INSERT INTO NOTIFICACION_GERENTE (
+                    ID_NOTIFICACION, ID_GERENTE_S, TITULO, MENSAJE
+                ) VALUES (
+                    SEQ_NOTIFICACION_GERENTE.NEXTVAL, :1, :2, :3
+                )
+            """, [
+                id_gerente_s,
+                "📢 Nuevo Evento Asignado",
+                f"Se ha registrado un nuevo evento en el salón asignado para la fecha {fecha}."
+            ])
+
+
+
+
         #cerrar conexion 
         cursor1.close()
         conexion.close()
