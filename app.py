@@ -261,24 +261,24 @@ def registrar_proyecto():
                                         id_usuario, rfc_usuario, curp_usuario, id_paquete, fecha_oracle, anticipo, estatus])
         conexion.commit()
 
-        # 🔔 Obtener el ID del gerente de salón que administra el salón asignado
-        cursor1.execute("SELECT ID_GERENTE_S FROM SALON WHERE ID_SALON = :1", [id_salon])
-        resultado = cursor1.fetchone()
-        if resultado:
-            id_gerente_s = resultado[0]
+        # # 🔔 Obtener el ID del gerente de salón que administra el salón asignado
+        # cursor1.execute("SELECT ID_GERENTE_S FROM SALON WHERE ID_SALON = :1", [id_salon])
+        # resultado = cursor1.fetchone()
+        # if resultado:
+        #     id_gerente_s = resultado[0]
 
-            # 🔔 Insertar notificación en NOTIFICACION_GERENTE
-            cursor1.execute("""
-                INSERT INTO NOTIFICACION_GERENTE (
-                    ID_NOTIFICACION, ID_GERENTE_S, TITULO, MENSAJE
-                ) VALUES (
-                    SEQ_NOTIFICACION_GERENTE.NEXTVAL, :1, :2, :3
-                )
-            """, [
-                id_gerente_s,
-                "📢 Nuevo Evento Asignado",
-                f"Se ha registrado un nuevo evento en el salón asignado para la fecha {fecha}."
-            ])
+        #     # 🔔 Insertar notificación en NOTIFICACION_GERENTE
+        #     cursor1.execute("""
+        #         INSERT INTO NOTIFICACION_GERENTE (
+        #             ID_NOTIFICACION, ID_GERENTE_S, TITULO, MENSAJE
+        #         ) VALUES (
+        #             SEQ_NOTIFICACION_GERENTE.NEXTVAL, :1, :2, :3
+        #         )
+        #     """, [
+        #         id_gerente_s,
+        #         "📢 Nuevo Evento Asignado",
+        #         f"Se ha registrado un nuevo evento en el salón asignado para la fecha {fecha}."
+        #     ])
 
 
 
@@ -1748,7 +1748,7 @@ def nuevo_gerente_salon():
             cursor = conexion.cursor()
             print (id_gerente_s, apaterno, amaterno, nombre, telefono, email)
             cursor.execute("""
-                INSERT INTO GERENTE_SALON (ID_GERENTE, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL)
+                INSERT INTO GERENTE_SALON (ID_GERENTE_S, APATERNO, AMATERNO, NOMBRE, TELEFONO, EMAIL)
                 VALUES (:1, :2, :3, :4, :5, :6)
             """, (id_gerente_s, apaterno, amaterno, nombre, telefono, email))
             
@@ -1773,7 +1773,7 @@ def nuevo_gerente_salon():
 #========================================================
 @app.route('/admin/actualizar_gerente', methods=['POST'])
 def actualizar_gerente():
-    id_gerente_s = request.form.get('id_gerente')
+    id_gerente_s = request.form.get('id_gerente_s')
     apaterno = request.form.get('apaterno')
     amaterno = request.form.get('amaterno')
     nombre = request.form.get('nombre')
@@ -1790,7 +1790,7 @@ def actualizar_gerente():
                 NOMBRE = :3,
                 TELEFONO = :4,
                 EMAIL = :5
-            WHERE ID_GERENTE_s = :6
+            WHERE ID_GERENTE_S = :6
         """, (apaterno, amaterno, nombre, telefono, email, id_gerente_s))
         conexion.commit()
         cursor.close()
